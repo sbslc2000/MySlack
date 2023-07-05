@@ -1,0 +1,268 @@
+{
+  "api_users_me_workspaces": {
+    "isSuccess": true,
+    "message": "성공",
+    "result": [
+      {
+        "id": "1",
+        "name": "My WorkspaceMy Workspace",
+        "created_at": "2014-01-01T00:00:00Z"
+      },
+      {
+        "id": "2",
+        "name": "지옥의 스프링부트",
+        "created_at": "2014-01-01T00:00:00Z"
+      }
+    ]
+  },
+  "api_users_me": {
+    "isSuccess": true,
+    "message": "성공",
+    "result": {
+      "id": "asdfasdfasdf",
+      "nickname": "홍길동",
+      "email": "sbslc2000@gmail.com"
+    }
+  },
+  "api_workspaces_1_channels": {
+    "isSuccess": true,
+    "message": "성공",
+    "result": [
+      {
+        "id": "1",
+        "name": "일반",
+        "description": "일반목적으로 개설된 채널",
+        "creator": {
+          "id": "1",
+          "nickname": "홍길동",
+          "email": "sbs"
+        },
+        "members": [
+          {
+            "id": "2",
+            "nickname": "홍길은",
+            "email": "sbs"
+          },
+          {
+            "id": "3",
+            "nickname": "홍길금",
+            "email": "sbs"
+          }
+        ],
+        "createdAt": "2014-01-01T00:00:00Z"
+      },
+      {
+        "id": "2",
+        "name": "알고리즘",
+        "description": "알고리즘목적으로 개설된 채널",
+        "creator": {
+          "id": "1",
+          "nickname": "홍길동",
+          "email": "sbs"
+        },
+        "members": [
+          {
+            "id": "2",
+            "nickname": "홍길은",
+            "email": "sbs"
+          },
+          {
+            "id": "3",
+            "nickname": "홍길금",
+            "email": "sbs"
+          }
+        ],
+        "createdAt": "2014-01-01T00:00:00Z"
+      },
+      {
+        "id": "3",
+        "name": "마케팅",
+        "description": "마케팅목적으로 개설된 채널",
+        "creator": {
+          "id": "1",
+          "nickname": "홍길동",
+          "email": "sbs"
+        },
+        "members": [
+          {
+            "id": "2",
+            "nickname": "홍길은",
+            "email": "sbs"
+          },
+          {
+            "id": "3",
+            "nickname": "홍길금",
+            "email": "sbs"
+          }
+        ],
+        "createdAt": "2014-01-01T00:00:00Z"
+      }
+    ]
+  },
+  "api_workspaces": {
+    "isSuccess": true,
+    "message": "성공",
+    "result": "1"
+  },
+  "api_workspaces_1": {
+    "isSuccess": true,
+    "message": "성공",
+    "result": {
+        "id": "1",
+        "name": "무슨무슨 스터디",
+        "creator": {
+            "id": "1",
+            "nickname": "서범석",
+            "email": "sbs"
+        }
+    }
+  },
+  "api_workspaces_1_channels": {
+    "isSuccess": true,
+    "message": "성공",
+    "result": [
+      {
+        "id": 1,
+        "name": "일반",
+        "description": "일반목적으로 개설된 채널",
+        "creator": {
+          "id": 1,
+          "nickname": "서범석",
+          "email": "sbs"
+        },
+        "members": [
+          {
+            "id": 2,
+            "nickname": "홍길은",
+            "email": "sbs"
+          },
+          {
+            "id": 3,
+            "nickname": "홍길금",
+            "email": "sbs"
+          }
+        ],
+        "createdAt": "2014-01-01T00:00:00Z"
+      },
+      {
+        "id": 2,
+        "name": "마케팅",
+        "description": "마케팅목적으로 개설된 채널",
+        "creator": {
+          "id": 1,
+          "nickname": "서범석",
+          "email": "sbs"
+        },
+        "members": [
+          {
+            "id": 2,
+            "nickname": "서범석",
+            "email": "sbs"
+          },
+          {
+            "id": 3,
+            "nickname": "홍길금",
+            "email": "sbs"
+          }
+        ],
+        "createdAt": "2014-01-01T00:00:00Z"
+      }
+    ]
+  },
+  "api_workspaces_1_users": {
+    "isSuccess": true,
+    "message": "성공",
+    "result": [
+      {
+        "id": 1,
+        "nickname": "서범석",
+        "email": "sbs",
+        "active": true
+      },
+      {
+        "id": 2,
+        "nickname": "홍길은",
+        "email": "sbs",
+        "active": true
+      },
+      {
+        "id": 3,
+        "nickname": "홍길금",
+        "email": "sbs",
+        "active":false
+      }
+    ]
+  },
+  "api_workspaces_1_channels_1_messages": {
+    "isSuccess": true,
+    "message": "성공",
+    "result": [
+      {
+        "id": 1,
+        "content": "안녕하세요",
+        "createdAt": "2014-01-01T00:00:00Z",
+        "sender": {
+          "id": 1,
+          "nickname": "서범석",
+          "email": "sbs",
+          "profileImage": "https://avatars.githubusercontent.com/u/77449822?v=4"
+        }
+      },
+      {
+        "id": 2,
+        "content": "반갑습니다",
+        "createdAt": "2014-01-01T00:00:00Z",
+        "sender": {
+          "id": 2,
+          "nickname": "홍길은",
+          "email": "sbs",
+          "profileImage": "https://avatars.githubusercontent.com/u/77449822?v=4"
+        }
+      },
+      {
+        "id": 3,
+        "content": "어제는 뭐하셨나요",
+        "createdAt": "2014-01-01T00:00:00Z",
+        "sender": {
+          "id": 2,
+          "nickname": "홍길은",
+          "email": "sbs",
+          "profileImage": "https://avatars.githubusercontent.com/u/77449822?v=4"
+        }
+      },
+      {
+        "id": 3,
+        "content": "밥은 잘 먹었나요",
+        "createdAt": "2014-01-01T00:00:00Z",
+        "sender": {
+          "id": 2,
+          "nickname": "홍길은",
+          "email": "sbs",
+          "profileImage": "https://avatars.githubusercontent.com/u/77449822?v=4"
+        }
+      },
+      {
+        "id": 1,
+        "content": "ANTITITI FRAGILE FRAGILE",
+        "createdAt": "2014-01-01T00:00:00Z",
+        "sender": {
+          "id": 1,
+          "nickname": "서범석",
+          "email": "sbs",
+          "profileImage": "https://avatars.githubusercontent.com/u/77449822?v=4"
+        }
+      },
+      {
+        "id": 1,
+        "content": "르세라핌 많이 사랑해주세요",
+        "createdAt": "2014-01-01T00:00:00Z",
+        "sender": {
+          "id": 1,
+          "nickname": "서범석",
+          "email": "sbs",
+          "profileImage": "https://avatars.githubusercontent.com/u/77449822?v=4"
+        }
+      }
+    ]
+  }
+}

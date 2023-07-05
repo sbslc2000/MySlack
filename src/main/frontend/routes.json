@@ -1,0 +1,6 @@
+{
+  "/api/users/me": "/api_users_me",
+  "/api/users/me/workspaces": "/api_users_me_workspaces",
+  "/api/workspaces/1/channels": "/api_workspaces_1_channels",
+  "/api/workspaces": "/api_workspaces"
+}
