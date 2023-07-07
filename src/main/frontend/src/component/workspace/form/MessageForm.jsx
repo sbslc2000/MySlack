@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import {useContext, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import axios from "axios";
 import {useLocation} from "react-router-dom";
 import {ChannelContext} from "../../../page/WorkspacePage";
@@ -93,15 +93,24 @@ function MessageForm() {
     const channelName = channelState.currentChannel.name;
     const formPlaceHolder = "#"+channelName+"에 메시지 보내기";
 
+
+    const onKeyDownHandler = (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            onSubmitHandler(e);
+        }
+    };
+
     const onChangeHandler = (e) => {
         setMessage(e.target.value);
     }
 
+
+
     const onSubmitHandler = (e) => {
         e.preventDefault();
-        console.log(message);
-        setMessage("");
         sendMessageRequest();
+        setMessage("");
     }
 
     const sendMessageRequest = () => {
@@ -143,18 +152,18 @@ function MessageForm() {
                 </MessageFormButtonBar>
                 <form>
                     <div className="form-group">
-                        <MessageTextarea  onChange={onChangeHandler} value={message} placeholder={formPlaceHolder} className="form-control" id="textareaContent"
+                        <MessageTextarea onKeyDown={onKeyDownHandler} onChange={onChangeHandler} value={message} placeholder={formPlaceHolder} className="form-control" id="textareaContent"
                                          rows="1"></MessageTextarea>
                     </div>
+                    <MessageFormButtonBar>
+                        <SubmitButton type="submit" onClick={onSubmitHandler} style={{position:"absolute",right:30}}>
+                            <svg data-nwn="true" aria-hidden="true" viewBox="0 0 20 20" className="" >
+                                <path fill="currentColor"
+                                      d="M1.5 2.25a.755.755 0 0 1 1-.71l15.596 7.807a.73.73 0 0 1 0 1.306L2.5 18.46l-.076.018a.749.749 0 0 1-.924-.728v-4.54c0-1.21.97-2.229 2.21-2.25l6.54-.17c.27-.01.75-.24.75-.79s-.5-.79-.75-.79l-6.54-.17A2.253 2.253 0 0 1 1.5 6.789v-4.54Z"></path>
+                            </svg>
+                        </SubmitButton>
+                    </MessageFormButtonBar>
                 </form>
-                <MessageFormButtonBar>
-                    <SubmitButton onClick={onSubmitHandler} style={{position:"absolute",right:30}}>
-                        <svg data-nwn="true" aria-hidden="true" viewBox="0 0 20 20" className="" >
-                            <path fill="currentColor"
-                                  d="M1.5 2.25a.755.755 0 0 1 1-.71l15.596 7.807a.73.73 0 0 1 0 1.306L2.5 18.46l-.076.018a.749.749 0 0 1-.924-.728v-4.54c0-1.21.97-2.229 2.21-2.25l6.54-.17c.27-.01.75-.24.75-.79s-.5-.79-.75-.79l-6.54-.17A2.253 2.253 0 0 1 1.5 6.789v-4.54Z"></path>
-                        </svg>
-                    </SubmitButton>
-                </MessageFormButtonBar>
             </MessageFormWrapper>
         </Wrapper>
     )

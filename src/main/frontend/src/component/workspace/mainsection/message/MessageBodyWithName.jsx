@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import MessageBody from "./MessageBody";
+import DateUtil from "../../../../util/DateUtil";
 
 const Wrapper = styled.div`
     width: 1584px;
@@ -18,7 +19,7 @@ function MessageBodyWithName(props) {
         <Wrapper>
             <div style={{height:22,fontSize:16,display:"inline-block"}}>
                 <span style={{fontWeight:900}}>{message.sender.nickname}</span>
-                <span style={{paddingLeft:5,fontSize:14}}>{message.createdAt}</span>
+                <span style={{paddingLeft:5,fontSize:14}}>{DateUtil.getDateInMessage(new Date(message.createdAt))}</span>
             </div>
             <MessageBody>
                 <span>{message.content}</span>

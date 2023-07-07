@@ -7,6 +7,7 @@ import axios from "axios";
 import {useContext, useEffect, useState} from "react";
 import MessageWithoutName from "./MessageWithoutName";
 import {ChannelContext, RefreshContext} from "../../../../page/WorkspacePage";
+import DateUtil from "../../../../util/DateUtil";
 
 const Wrapper = styled.div`
     min-height:495px;
@@ -102,17 +103,35 @@ function MessageSection(props) {
          */
 
     let prevSender = {};
-
+    let prevDate = null;
     let content = <>
-        <SeparationLine date={"6월 27일 화요일"}></SeparationLine>
         {messages.map((message) => {
+            let separationAddFlag = false;
+            let currentDate = new Date(message.createdAt);
+
+            if(prevDate === null || DateUtil.compareDate(prevDate,currentDate) !== 0) {
+                separationAddFlag = true;
+            }
+
+            prevDate = currentDate;
+
             if(prevSender.id !== message.sender.id){
 
                 prevSender = message.sender;
-                return <MessageWithName message={message}/>
+                return (
+                <>
+                    {separationAddFlag && <SeparationLine date={DateUtil.getDateKr(currentDate)}></SeparationLine>}
+                    <MessageWithName message={message}/>
+                </>
+                );
             } else {
                 prevSender = message.sender;
-                return <MessageWithoutName message={message}/>
+                return (<>
+                        {separationAddFlag && <SeparationLine date={DateUtil.getDateKr(currentDate)}></SeparationLine>}
+                        <MessageWithoutName message={message}/>
+                </>
+
+                );
             }
         })}
     </>;
