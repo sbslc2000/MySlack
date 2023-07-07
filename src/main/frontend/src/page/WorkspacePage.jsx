@@ -34,8 +34,38 @@ function WorkspacePage() {
         messagesRefresh:messagesRefresh,
         setMessagesRefresh:setMessagesRefresh,
         directMessageRefresh:directMessageRefresh,
-        setDirectMessageRefresh:setDirectMessageRefresh
+        setDirectMessageRefresh:setDirectMessageRefresh,
     }
+
+    const fetchChannels = (cursor) => {
+
+        console.log("fetchChannel called");
+        const workspaceId = location.pathname.split("/")[3];
+        axios.get("/api/workspaces/"+workspaceId+"/channels").then((response)=>{
+            if(response.data.isSuccess){
+                //let index = str === "default" ? 0 : response.data.result.length-1;
+                setChannels(response.data.result);
+
+                if(cursor === "last") {
+                    setCurrentChannel(response.data.result[response.data.result.length-1]);
+                } else if (cursor === "first") {
+                    setCurrentChannel(response.data.result[0]);
+                }
+
+                setIsChannelLoading(false);
+            }
+        }).catch((error)=>{
+
+        });
+    }
+
+    const channelState = {
+        currentChannel: currentChannel,
+        setCurrentChannel: setCurrentChannel,
+        channels: channels,
+        fetchChannels : fetchChannels
+    };
+
 
 
     const onMessageHandler = (message) => {
@@ -119,41 +149,13 @@ function WorkspacePage() {
         });
     }
 
-    const fetchChannels = (cursor) => {
 
-        console.log("fetchChannel called");
-        const workspaceId = location.pathname.split("/")[3];
-        axios.get("/api/workspaces/"+workspaceId+"/channels").then((response)=>{
-            if(response.data.isSuccess){
-                //let index = str === "default" ? 0 : response.data.result.length-1;
-                setChannels(response.data.result);
-
-                if(cursor === "last") {
-                    setCurrentChannel(response.data.result[response.data.result.length-1]);
-                } else if (cursor === "first") {
-                    setCurrentChannel(response.data.result[0]);
-                }
-
-
-
-                setIsChannelLoading(false);
-            }
-        }).catch((error)=>{
-
-        });
-    }
 
     useEffect(()=>{
         fetchWorkspace();
         fetchChannels("first");
     },[]);
 
-    const channelState = {
-        currentChannel: currentChannel,
-        setCurrentChannel: setCurrentChannel,
-        channels: channels,
-        fetchChannels : fetchChannels
-    };
 
 
     let content;

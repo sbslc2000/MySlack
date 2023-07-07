@@ -29,7 +29,7 @@ function ChannelSection(props) {
           <ChannelSectionHeader workspace={workspace}/>
           <ChannelSectionBody>
               <ChannelWelcome workspace={workspace} channel={currentChannel}/>
-              <MessageSection channel={currentChannel}>
+              <MessageSection>
               </MessageSection>
           </ChannelSectionBody>
           <MessageForm></MessageForm>

@@ -11,7 +11,8 @@ build/
 application.yml
 node_modules/**
 src/main/frontend/node_modules/**
-src/main/resources/static/static/**
+src/main/resources/static/**
+src/main/frontend/build/**
 build/**
 
 ### STS ###

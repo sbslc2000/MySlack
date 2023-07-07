@@ -90,6 +90,8 @@ function MessageForm() {
     let workspaceId = location.pathname.split("/")[3];
     let channelState = useContext(ChannelContext);
     let channelId = channelState.currentChannel.id;
+    const channelName = channelState.currentChannel.name;
+    const formPlaceHolder = "#"+channelName+"에 메시지 보내기";
 
     const onChangeHandler = (e) => {
         setMessage(e.target.value);
@@ -141,7 +143,7 @@ function MessageForm() {
                 </MessageFormButtonBar>
                 <form>
                     <div className="form-group">
-                        <MessageTextarea  onChange={onChangeHandler} value={message} placeholder="#워크스페이스이름에 메시지 보내기" className="form-control" id="textareaContent"
+                        <MessageTextarea  onChange={onChangeHandler} value={message} placeholder={formPlaceHolder} className="form-control" id="textareaContent"
                                          rows="1"></MessageTextarea>
                     </div>
                 </form>
