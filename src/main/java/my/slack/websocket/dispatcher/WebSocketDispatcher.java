@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import my.slack.domain.user.model.User;
 import my.slack.websocket.annotation.MessageMapping;
+import my.slack.websocket.annotation.ResponseMessage;
 import my.slack.websocket.annotation.WebSocketSessionAttribute;
 import my.slack.websocket.model.WebSocketMessageRequest;
 import org.springframework.context.ApplicationContext;
@@ -51,9 +52,10 @@ public class WebSocketDispatcher {
                         continue;
                     }
                     MessageMapping requestMessage = method.getAnnotation(MessageMapping.class);
+                    ResponseMessage responseMessage = method.getAnnotation(ResponseMessage.class);
                     Parameter[] parameters = method.getParameters();
 
-                    mappingTable.add(requestMessage.value(), new MappingInfo(clazz, method, parameters));
+                    mappingTable.add(requestMessage.value(), new MappingInfo(clazz, method, parameters, responseMessage.value()));
                 }
             }
 
@@ -113,6 +115,7 @@ public class WebSocketDispatcher {
         log.info("WebSocketDispatcher.dispatch() 호출");
         log.info("message = {}", message);
         MappingInfo mappingInfo = mappingTable.get(message);
+        String responseMessage = mappingInfo.getResponseMessage();
         Parameter[] parameters = mappingInfo.getParameters();
 
         // 빈 이름을 통해 인스턴스 가져오기
@@ -132,6 +135,7 @@ public class WebSocketDispatcher {
             log.info("parameter {} binding",i);
 
             WebSocketSessionAttribute paramAnnotation = parameter.getAnnotation(WebSocketSessionAttribute.class);
+            //만약 파라미터에 @WebSocketSessionAttribute 어노테이션이 붙어있다면
             if(paramAnnotation != null) {
                 String value = paramAnnotation.value();
                 log.info("value = {}", value);
@@ -144,10 +148,12 @@ public class WebSocketDispatcher {
                 } else {
                     log.error("value 이름이 잘못 설정되었습니다.");
                 }
-            } else {
+            } else { //파라미터에 @WebSocketSessionAttribute 어노테이션이 붙어있지 않다면
                 String paramName = parameter.getName();
                 Class<?> paramType = parameter.getType();
 
+                //웹소켓 body에서 파라미터 이름으로 JsonNode를 가져오고
+                //이것을 파라미터의 타입으로 변환한 Object를 해당 파라미터로 전송
                 JsonNode jsonNode = body.get(paramName);
                 Object parsedParam = objectMapper.treeToValue(jsonNode, paramType);
                 parsedParameters[i] = parsedParam;
@@ -161,14 +167,15 @@ public class WebSocketDispatcher {
         }
 
         //요청 전송
-        String responseMessage = (String) mappingInfo.getMethod()
+        //응답은 컨트롤러의 반환값으로, 이것을 웹소켓 응답의 body에 담아서 전송
+        Object responseBody = (Object) mappingInfo.getMethod()
                 .invoke(ac.getBean(beanName), parsedParameters);
 
-        log.info("responseMessage: {}",responseMessage);
+
 
 
         //결과 반환
-        return new WebSocketMessageRequest(responseMessage,null,targetUsers);
+        return new WebSocketMessageRequest(responseMessage,responseBody,targetUsers);
     }
 
 }

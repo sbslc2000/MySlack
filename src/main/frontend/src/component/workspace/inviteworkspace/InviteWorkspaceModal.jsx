@@ -2,6 +2,10 @@ import styled from "styled-components";
 import SlackDefaultButton from "../../../ui/SlackDefaultButton";
 import {useState} from "react";
 import axios from "axios";
+import ModalFooter from "../../modal/structure/ModalFooter";
+import ModalBody from "../../modal/structure/ModalBody";
+import ModalHeader from "../../modal/structure/ModalHeader";
+import MyLogger from "../../../util/MyLogger";
 
 
 const ModalDialog = styled.div`
@@ -39,32 +43,11 @@ const HeaderText = styled.h1`
     font-weight:900;
 `;
 
-const ModalHeader = styled.div`
-    padding-top:20px;
-    padding-bottom:20px;
-    border-bottom:0px;
-    display:flex;
-    flex-direction:column;
-  
-`;
-
-const ModalBody = styled.div`
-    border-bottom:0px;
-    padding-top:0px;
-`;
-
 const InviteLinkCopyButton = styled.button`
     background-color: inherit;
     color:#1D9BD1;
     border:0;
 `;
-
-const ModalFooter = styled.div`
-    border-top:0px;
-    display:flex;
-    justify-content:space-between;
-`
-
 
 function InviteWorkspaceModal(props) {
     const [progress,setProgress] = useState(0);
@@ -72,6 +55,7 @@ function InviteWorkspaceModal(props) {
 
     const width = progress === 0 ? 650 : 520;
     const height = 500;
+
 
     const nextButtonHandler = () => {
         setProgress(1);
@@ -87,13 +71,13 @@ function InviteWorkspaceModal(props) {
 
     let modalHeader = progress === 0 ?
         (
-            <ModalHeader  className="modal-header">
+            <ModalHeader  >
                 <HeaderText className="modal-title fs-5" id="exampleModalLabel">{props.workspace.name}(으)로 사용자 초대</HeaderText>
                 <button onClick={closeHandler} type="button" className="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </ModalHeader>
         ) : (
             <>
-                <ModalHeader className="modal-header">
+                <ModalHeader >
                     <button onClick={closeHandler} type="button" className="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     <HeaderText>✅</HeaderText>
                     <HeaderText style={{fontSize:18}} className="modal-title fs-5" id="exampleModalLabel">초대를 보냈습니다</HeaderText>
@@ -102,7 +86,7 @@ function InviteWorkspaceModal(props) {
         );
 
     let modalBody = progress === 0 ? (
-        <ModalBody className="modal-body" >
+        <ModalBody>
             <div style={{paddingLeft:5,paddingBottom:8,fontSize:15}}>
                  초대 받을 사람:
             </div>
@@ -114,24 +98,24 @@ function InviteWorkspaceModal(props) {
             </form>
         </ModalBody>
     ): (
-        <ModalBody className="modal-body" style={{borderBottom:0}}>
+        <ModalBody>
             <div>@ sbslc2000@gmail.com</div>
         </ModalBody>
     );
 
 
     let modalFooter = progress === 0 ? (
-        <ModalFooter className="modal-footer" style={{}}>
+        <ModalFooter>
             <InviteLinkCopyButton>
                 @ 초대 링크 복사
             </InviteLinkCopyButton>
             <SlackDefaultButton fontSize={15} width={80} height={36} title={"다음"} color={"primary"} onClick={nextButtonHandler} type="button" data-bs-toggle="modal"  className="btn btn-primary"></SlackDefaultButton>
         </ModalFooter>
     ): (
-        <div className="modal-footer" style={{borderTop:0}}>
+        <ModalFooter >
             <SlackDefaultButton fontSize={15} width={180} height={36} title={"더 많은 사용자 초대"} color={"back"} onClick={backButtonHandler} type="button"  className="btn btn-primary"></SlackDefaultButton>
             <SlackDefaultButton fontSize={15} width={80} height={36} title={"완료됨"} color={"primary"} type="button" dataBsDismiss={"modal"} className="btn btn-primary"></SlackDefaultButton>
-        </div>
+        </ModalFooter>
     );
     return (
         <div  className="modal fade" id="inviteWorkspace" tabIndex="-1" aria-labelledby="exampleModalLabel"

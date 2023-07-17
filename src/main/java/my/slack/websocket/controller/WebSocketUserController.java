@@ -6,6 +6,7 @@ import my.slack.domain.user.model.User;
 import my.slack.domain.workspace.WorkspaceService;
 import my.slack.domain.workspace.model.Workspace;
 import my.slack.websocket.annotation.MessageMapping;
+import my.slack.websocket.annotation.ResponseMessage;
 import my.slack.websocket.annotation.WebSocketSessionAttribute;
 import my.slack.websocket.service.ActiveUserService;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,8 @@ public class WebSocketUserController {
     private final ActiveUserService activeUserService;
     private final WorkspaceService workspaceService;
     @MessageMapping("USER_CONNECT")
-    public String handleUserConnect(@WebSocketSessionAttribute("userId") String userId,
+    @ResponseMessage("REFRESH_DM_USER_LIST")
+    public void handleUserConnect(@WebSocketSessionAttribute("userId") String userId,
                                     @WebSocketSessionAttribute("targetUsers") List<User> targetUsers) {
 
 
@@ -48,11 +50,12 @@ public class WebSocketUserController {
         //targetUsers.remove(accessUser);
 
         log.info("REFRESH TARGET : " + targetUsers);
-        return "REFRESH_DM_USER_LIST";
+        return;
     }
 
     @MessageMapping("USER_DISCONNECT")
-    public String handleUserDisconnect(@WebSocketSessionAttribute("userId") String userId,
+    @ResponseMessage("REFRESH_DM_USER_LIST")
+    public void handleUserDisconnect(@WebSocketSessionAttribute("userId") String userId,
                                        @WebSocketSessionAttribute("targetUsers") List<User> targetUsers) {
 
         List<User> activeUsers = activeUserService.getActiveUsers();
@@ -74,6 +77,6 @@ public class WebSocketUserController {
 
 
         log.info("REFRESH TARGET : " + targetUsers.toString());
-        return "REFRESH_DM_USER_LIST";
+        return;
     }
 }

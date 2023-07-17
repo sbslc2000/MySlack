@@ -46,6 +46,9 @@ public class MyWebSocketHandler extends TextWebSocketHandler implements WebSocke
         log.info(session.getId()+"로부터 메시지 수신: "+message.getPayload());
         super.handleTextMessage(session, message);
 
+        /**
+         * 웹소켓 요청에 대해 WebSocketRequestDto 객체로 변환하고, 이 값을 기반으로 message와 body를 추출하여 넘김
+         */
         WebSocketRequestDto request = objectMapper.readValue(message.getPayload(), WebSocketRequestDto.class);
         handleRequest(session, request.getMessage(),request.getBody());
 
@@ -64,6 +67,7 @@ public class MyWebSocketHandler extends TextWebSocketHandler implements WebSocke
         String userId = getUserIdFromSession(session);
 
         try {
+            //dispatcher에 userId와 message, body를 넘겨서 message에 해당하는 코드를 수행한 뒤 나온 결과를 반환
             WebSocketMessageRequest res = dispatcher.dispatch(userId,message, body);
             sendMessage(res);
         } catch (Exception e) {

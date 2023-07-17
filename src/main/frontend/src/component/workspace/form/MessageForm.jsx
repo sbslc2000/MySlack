@@ -2,7 +2,8 @@ import styled from "styled-components";
 import {useContext, useEffect, useState} from "react";
 import axios from "axios";
 import {useLocation} from "react-router-dom";
-import {ChannelContext} from "../../../page/WorkspacePage";
+import {ChannelContext, RefreshContext, WebSocketSendMessageRequestContext} from "../../../page/WorkspacePage";
+import MyLogger from "../../../util/MyLogger";
 
 const Wrapper = styled.div`
     padding-left:20px;
@@ -82,6 +83,14 @@ const SubmitButton = styled.button`
     }
 `;
 
+const TypingInfo = styled.div`
+    height:0px;
+    position:relative;
+    top:-25px;
+    font-size:14px;
+
+`;
+
 function MessageForm() {
 
     const [message, setMessage] = useState("");
@@ -89,9 +98,38 @@ function MessageForm() {
     let location = useLocation();
     let workspaceId = location.pathname.split("/")[3];
     let channelState = useContext(ChannelContext);
+    let refreshContext = useContext(RefreshContext);
+    let webSocketSendMessageRequestContext = useContext(WebSocketSendMessageRequestContext);
     let channelId = channelState.currentChannel.id;
     const channelName = channelState.currentChannel.name;
     const formPlaceHolder = "#"+channelName+"에 메시지 보내기";
+    const [isAnyUserTyping,setIsAnyUserTyping] = useState(false);
+    const [typingInfoMessage,setTypingInfoMessage] = useState("");
+
+    let usersTypingInfo = refreshContext.usersTypingInfo;
+    let typingInfo;
+    useEffect(() => {
+        MyLogger.trace("usersTypingInfo 변경으로 인한 사용자 타이핑 정보 렌더링");
+
+        let userNames = [];
+        for(let i = 0; i< usersTypingInfo.length; i++) {
+            if(usersTypingInfo[i].channelId === channelId) {
+                MyLogger.trace("usersTypingInfo["+i+"]의 channelId가 현재 채널의 channelId과 일치함");
+                MyLogger.data("현재의 userTypingInfo","userTypingInfo[i] : ",usersTypingInfo[i]);
+                userNames.push(usersTypingInfo[i].user.nickname);
+            }
+        }
+
+        MyLogger.data("usersTypingInfo로부터 currentId에 해당하는 유저들의 이름 목록","userNames",userNames);
+        if(userNames.length === 0) {
+            setIsAnyUserTyping(false);
+        } else {
+            setIsAnyUserTyping(true);
+            setTypingInfoMessage(userNames.join(",")+"(이)가 입력중입니다...");
+        }
+
+        MyLogger.data("최종적으로 렌더링되는 내용","typingInfo",typingInfo);
+    },[refreshContext.usersTypingInfo]);
 
 
     const onKeyDownHandler = (e) => {
@@ -103,6 +141,14 @@ function MessageForm() {
 
     const onChangeHandler = (e) => {
         setMessage(e.target.value);
+    }
+
+    const onFocusHandler = (e) => {
+        webSocketSendMessageRequestContext.setSendTypingMessage(true);
+    }
+
+    const onBlurHandler = (e) => {
+        webSocketSendMessageRequestContext.setSendTypingEndMessage(true);
     }
 
 
@@ -126,6 +172,7 @@ function MessageForm() {
 
     return (
         <Wrapper>
+            {isAnyUserTyping && <TypingInfo>{typingInfoMessage}</TypingInfo>}
             <MessageFormWrapper>
                 <MessageFormButtonBar>
                     <MessageFormButton>
@@ -152,7 +199,7 @@ function MessageForm() {
                 </MessageFormButtonBar>
                 <form>
                     <div className="form-group">
-                        <MessageTextarea onKeyDown={onKeyDownHandler} onChange={onChangeHandler} value={message} placeholder={formPlaceHolder} className="form-control" id="textareaContent"
+                        <MessageTextarea onBlur={onBlurHandler} onFocus={onFocusHandler}  onKeyDown={onKeyDownHandler} onChange={onChangeHandler} value={message} placeholder={formPlaceHolder} className="form-control" id="textareaContent"
                                          rows="1"></MessageTextarea>
                     </div>
                     <MessageFormButtonBar>

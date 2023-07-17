@@ -42,7 +42,7 @@ public class ChannelService {
         //}
 
         //Channel 생성
-        List<User> initialMembers = null;
+        List<User> initialMembers;
 
         //if(channelCreateRequestDto.isPrivate()) {
         //initialMembers = channelCreateRequestDto.getInitialMembers()

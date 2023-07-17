@@ -11,11 +11,13 @@ public class MappingInfo {
     private final Class<?> clazz;
     private final Method method;
     private final Parameter[] parameters;
+    private final String responseMessage;
 
-    public MappingInfo(Class clazz,Method method, Parameter[] parameters) {
+    public MappingInfo(Class clazz,Method method, Parameter[] parameters, String responseMessage) {
         this.method = method;
         this.clazz = clazz;
         this.parameters = parameters;
+        this.responseMessage = responseMessage;
     }
 
     @Override

@@ -7,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME) // 어노테이션 정보를 런타임에 유지
 @Target(ElementType.METHOD)
-public @interface ResponseType {
+public @interface ResponseMessage {
     String value();
 }
