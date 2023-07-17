@@ -26,17 +26,16 @@ public class UserController {
     @GetMapping("/{userId}/workspaces")
     public BaseResponse<List<WorkspaceDto>> getUserWorkspaces(@PathVariable String userId, @SessionAttribute("userId") String sessionUserId) {
 
-        if(!userId.equals(sessionUserId)) {
+        if(!userId.equals(sessionUserId))
             throw new ClientFaultException(FORBIDDEN,"다른 유저의 워크스페이스를 조회할 수 없습니다.");
-        }
-        List<WorkspaceDto> userWorkspaces = workspaceService.getUserWorkspaces(userId).stream().map(WorkspaceDto::of).collect(Collectors.toList());
-        return new BaseResponse<>(userWorkspaces);
+
+        return new BaseResponse<>(workspaceService.getUserWorkspaces(userId));
     }
 
     @GetMapping("/me/workspaces")
     public BaseResponse<List<WorkspaceDto>> getUserWorkspacesBySession(@SessionAttribute("userId") String userId) {
 
-        List<WorkspaceDto> userWorkspaces = workspaceService.getUserWorkspaces(userId).stream().map(WorkspaceDto::of).collect(Collectors.toList());
+        List<WorkspaceDto> userWorkspaces = workspaceService.getUserWorkspaces(userId);
         log.info("userWorkspaces = {}",userWorkspaces);
 
         return new BaseResponse<>(userWorkspaces);

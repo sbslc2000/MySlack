@@ -8,6 +8,7 @@ import {useContext, useEffect, useState} from "react";
 import MessageWithoutName from "./MessageWithoutName";
 import {ChannelContext, RefreshContext} from "../../../../page/WorkspacePage";
 import DateUtil from "../../../../util/DateUtil";
+import {getMessages} from "../../../../api/message";
 
 const Wrapper = styled.div`
     min-height:470px;
@@ -64,45 +65,24 @@ const MessageBody = styled.div`
 
 
 function MessageSection(props) {
+    const channelState = useContext(ChannelContext);
+    let refreshState = useContext(RefreshContext);
+
     let location = useLocation();
     let workspaceId = location.pathname.split("/")[3];
+    let channelId = channelState.currentChannel.id;
     const [messages, setMessages] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    const channelState = useContext(ChannelContext);
-
-    let refreshState = useContext(RefreshContext);
-
-    const fetchMessage = () => {
-        const url = "/api/workspaces/" + workspaceId + "/channels/" + channelState.currentChannel.id + "/messages";
-        axios.get(url).then((response) => {
-            if (response.data.isSuccess) {
-                const messages = response.data.data;
-                console.log(messages);
-
-                setMessages(response.data.result);
-                setIsLoading(false);
-            }
-        }).catch((error) => {
-
-        });
-    }
-
     useEffect(() => {
-        fetchMessage();
+        getMessages(workspaceId,channelId).then((messages) => {
+            setMessages(messages);
+            setIsLoading(false);
+        });
+
         refreshState.setMessagesRefresh(false);
     }, [channelState.currentChannel,refreshState.messagesRefresh]);
 
-        /*
-    if(refreshState.messagesRefresh) {
-        console.log("messageRefresh");
-        setTimeout(()=> {
-            fetchMessage();
-        },100);
-        refreshState.setMessagesRefresh(false);
-    }
-
-         */
 
     let prevSender = {};
     let prevDate = null;

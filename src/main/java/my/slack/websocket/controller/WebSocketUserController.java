@@ -3,6 +3,7 @@ package my.slack.websocket.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import my.slack.domain.user.model.User;
+import my.slack.domain.workspace.WorkspaceRepository;
 import my.slack.domain.workspace.WorkspaceService;
 import my.slack.domain.workspace.model.Workspace;
 import my.slack.websocket.annotation.MessageMapping;
@@ -21,6 +22,7 @@ public class WebSocketUserController {
 
     private final ActiveUserService activeUserService;
     private final WorkspaceService workspaceService;
+    private final WorkspaceRepository workspaceRepository;
     @MessageMapping("USER_CONNECT")
     @ResponseMessage("REFRESH_DM_USER_LIST")
     public void handleUserConnect(@WebSocketSessionAttribute("userId") String userId,
@@ -32,7 +34,7 @@ public class WebSocketUserController {
 
 
         //접속한 사용자의 워크스페이스 목록을 가져온다.
-        List<Workspace> workspaces = workspaceService.getUserWorkspaces(userId);
+        List<Workspace> workspaces = workspaceRepository.findByUserId(userId);
 
 
         //기존의 사용자의 workspace에 접속한 사용자가 존재한다면, 이는 refresh 대상임
@@ -61,8 +63,7 @@ public class WebSocketUserController {
         List<User> activeUsers = activeUserService.getActiveUsers();
         activeUserService.setDisconnect(userId);
 
-
-        List<Workspace> workspaces = workspaceService.getUserWorkspaces(userId);
+        List<Workspace> workspaces = workspaceRepository.findByUserId(userId);
 
         for (Workspace workspace : workspaces) {
             for (User user : activeUsers) {

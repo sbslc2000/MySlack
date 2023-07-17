@@ -4,6 +4,7 @@ import ItemList from "./ui/ItemList";
 import axios from "axios";
 import {useContext, useEffect, useState} from "react";
 import {RefreshContext} from "../../../page/WorkspacePage";
+import {getUsersInWorkspace} from "../../../api/user";
 
 
 function DirectMessageUserList(props) {
@@ -13,33 +14,23 @@ function DirectMessageUserList(props) {
 
     const refreshState = useContext(RefreshContext);
 
-
-    const fetchWorkspaceUsers = () => {
-      axios.get("/api/workspaces/"+workspaceId+"/users").then((response)=> {
-        if(response.data.isSuccess){
-                console.log(response.data.result);
-                setMembers(response.data.result);
-            }
-
-        setIsLoading(false);
-      }).catch((error)=> {
-
-      });
-    };
-
     useEffect(()=>{
-        fetchWorkspaceUsers();
+        getUsersInWorkspace(workspaceId).then((members)=> {
+            setMembers(members);
+            setIsLoading(false);
+        });
     },[]);
 
     if(refreshState.directMessageRefresh) {
         console.log("directMessageRefresh");
-        fetchWorkspaceUsers();
+        getUsersInWorkspace(workspaceId).then(setMembers);
         refreshState.setDirectMessageRefresh(false);
     }
 
     if(isLoading) {
         return <></>;
     }
+
     return (
         <ItemList>
             <MenuItem><span style={{fontSize:13,width:17,display:"inline-block"}}>▼</span> 다이렉트 메시지</MenuItem>
@@ -49,8 +40,8 @@ function DirectMessageUserList(props) {
                 );
             })
             }
-            <MenuItem  style={{width:260}} type="button" data-bs-toggle="modal" data-bs-target="#inviteWorkspace">
-                <span style={{width: 17, display: "inline-block"}}>+</span> 직장 동료 추가
+            <MenuItem tag={"+"} style={{width:260}} type="button" dataBsToggle="modal" dataBsTarget="#inviteWorkspace">
+                직장 동료 추가
             </MenuItem>
         </ItemList>
     );

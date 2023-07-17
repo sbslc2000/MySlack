@@ -24,11 +24,9 @@ public class WorkspaceController {
     @GetMapping("/{workspaceId}")
     public BaseResponse<WorkspaceDto> getWorkspace(@PathVariable String workspaceId) {
         log.info("/api/workspaces/{}", workspaceId);
-        Workspace workspace = workspaceService.findById(workspaceId);
-        return new BaseResponse<>(WorkspaceDto.of(workspace));
+        WorkspaceDto workspaceDto = workspaceService.findById(workspaceId);
+        return new BaseResponse<>(workspaceDto);
     }
-
-
 
     @GetMapping("/{workspaceId}/invite-link")
     public BaseResponse<String> getInviteLink(@PathVariable String workspaceId) {

@@ -1,6 +1,7 @@
 import styled from "styled-components";
 
-const MenuItem = styled.button`
+const Wrapper = styled.button`
+    width:260px;
     display:flex;
     background-color:${props => props.selected ?  "#1164A3" : "inherit"};
     color:${props => props.selected ?  "#F3F7FA" : "inherit"};
@@ -17,5 +18,32 @@ const MenuItem = styled.button`
     }
     line-height:28px;
 `;
+
+const Tag = styled.span`
+    width: 17px;
+    display: inline-block;
+`;
+
+function MenuItem(props) {
+
+    const dataBsToggle = props.dataBsToggle;
+    const dataBsTarget = props.dataBsTarget;
+    const onClickHandler = props.onClick;
+    console.log(dataBsToggle);
+
+    const tag = props.tag;
+    return (
+        <Wrapper
+            selected={props.selected}
+            id = {props.id}
+            data-bs-toggle={dataBsToggle}
+            data-bs-target={dataBsTarget}
+            onClick={onClickHandler}
+        >
+            {tag && <Tag>{tag}</Tag>}
+            {props.children}
+        </Wrapper>
+    )
+}
 
 export default MenuItem;

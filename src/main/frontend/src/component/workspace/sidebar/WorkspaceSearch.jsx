@@ -5,6 +5,7 @@ import ItemList from "./ui/ItemList";
 import MenuItem from "./ui/MenuItem";
 import DirectMessageUserList from "./DirectMessageUserList";
 import CreateChannelModal from "../createchannel/CreateChannelModal";
+import MyLogger from "../../../util/MyLogger";
 
 const Wrapper = styled.div`
     color : #9A9A9D;
@@ -35,8 +36,11 @@ const ChannelAddDropdownList = styled.li`
         border:0;
         color:#D1D2D3; 
     }
-        
+`;
 
+const ItemSpan = styled.span`
+    width: 17px;
+    display: inline-block;
 `;
 
 function WorkspaceSearch(props) {
@@ -48,9 +52,8 @@ function WorkspaceSearch(props) {
 
 
     const handleChangeChannel = (e) => {
-
         const targetValue = e.target.id;
-        console.log(targetValue);
+        MyLogger.data("클릭된 채널의 ID","targetValue",targetValue);
         props.channelState.setCurrentChannel(channels.find((channel) => {
             return channel.id == targetValue;
         }));
@@ -59,24 +62,25 @@ function WorkspaceSearch(props) {
     return (
         <Wrapper>
             <ItemList>
-                <MenuItem><span style={{width: 17, display: "inline-block"}}>#</span> 스레드</MenuItem>
-                <MenuItem><span style={{width: 17, display: "inline-block"}}>@</span> 멘션 및 반응</MenuItem>
-                <MenuItem><span style={{width: 17, display: "inline-block"}}>!</span> 초안 및 전송됨</MenuItem>
-                <MenuItem><span style={{width: 17, display: "inline-block"}}>?</span> MySlack Connect</MenuItem>
+                <MenuItem tag={"#"}>스레드</MenuItem>
+                <MenuItem tag={"@"}> 멘션 및 반응</MenuItem>
+                <MenuItem tag={"!"}> 초안 및 전송됨</MenuItem>
+                <MenuItem tag={"?"}> MySlack Connect</MenuItem>
             </ItemList>
             <ItemList>
-                <MenuItem><span style={{fontSize: 13, width: 17, display: "inline-block"}}>▼</span> 채널</MenuItem>
+                <MenuItem tag={"▼"}>채널</MenuItem>
                 {channels.map((channel) => {
                     return (
-                        <MenuItem selected={channel.id == props.channelState.currentChannel.id}
-                                  onClick={handleChangeChannel} id={channel.id} key={channel.id}><span
-                            style={{width: 17, display: "inline-block"}}>#</span> {channel.name}</MenuItem>
+                        <MenuItem selected={channel.id == currentChannel.id}
+                                  onClick={handleChangeChannel} id={channel.id} key={channel.id} tag={"#"}>
+                             {channel.name}
+                        </MenuItem>
                     );
                 })
                 }
                 <div className={"dropdown"}>
-                    <MenuItem style={{width:260}} type="button" data-bs-toggle="dropdown">
-                        <span style={{width: 17, display: "inline-block"}}>+</span> 채널 추가
+                    <MenuItem style={{width:260}} type="button" dataBsToggle="dropdown" tag={"+"}>
+                         채널 추가
                     </MenuItem>
                     <ChannelAddDropdownMenu className="dropdown-menu">
                         <ChannelAddDropdownList><button className="dropdown-item" data-bs-toggle="modal" data-bs-target="#createChannel" >새 채널 생성</button></ChannelAddDropdownList>

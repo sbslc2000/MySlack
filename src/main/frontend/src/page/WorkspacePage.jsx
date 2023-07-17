@@ -12,6 +12,9 @@ import CreateChannelModal from "../component/workspace/createchannel/CreateChann
 import InviteWorkspaceModal from "../component/workspace/inviteworkspace/InviteWorkspaceModal";
 import MyLogger from "../util/MyLogger";
 import ErrorModal from "../component/modal/ErrorModal";
+import {getUser} from "../api/user";
+import {getChannelsByWorkspaceId} from "../api/channel";
+import {getWorkspace} from "../api/workspace";
 
 
 const RefreshContext = React.createContext();
@@ -59,12 +62,8 @@ function WorkspacePage() {
         }
 
         setUsersTypingInfo((prev) => [...prev, parsedData]);
-
         MyLogger.data("typingInfo 가 더해진 usersTypingInfo State", "usersTypingInfo", usersTypingInfo);
-
     };
-
-
 
     const webSocketSendMessageRequestState = {
         sendTypingMessage: sendTypingMessage,
@@ -73,7 +72,6 @@ function WorkspacePage() {
         setSendTypingEndMessage: setSendTypingEndMessage
 
     }
-
 
     const refreshState = {
         messagesRefresh: messagesRefresh,
@@ -84,33 +82,11 @@ function WorkspacePage() {
         setUsersTypingInfo: setUsersTypingInfo
     }
 
-    const fetchChannels = (cursor) => {
-
-        console.log("fetchChannel called");
-        const workspaceId = location.pathname.split("/")[3];
-        axios.get("/api/workspaces/" + workspaceId + "/channels").then((response) => {
-            if (response.data.isSuccess) {
-                //let index = str === "default" ? 0 : response.data.result.length-1;
-                setChannels(response.data.result);
-
-                if (cursor === "last") {
-                    setCurrentChannel(response.data.result[response.data.result.length - 1]);
-                } else if (cursor === "first") {
-                    setCurrentChannel(response.data.result[0]);
-                }
-
-                setIsChannelLoading(false);
-            }
-        }).catch((error) => {
-
-        });
-    }
 
     const channelState = {
         currentChannel: currentChannel,
         setCurrentChannel: setCurrentChannel,
-        channels: channels,
-        fetchChannels: fetchChannels
+        channels: channels
     };
 
 
@@ -120,7 +96,7 @@ function WorkspacePage() {
         if (message === "REFRESH_DM_USER_LIST") {
             setDirectMessageRefresh(true);
         } else if (message === "REFRESH_CHANNEL_LIST") {
-            fetchChannels();
+            getChannelsByWorkspaceId().then(setChannels);
         } else if (message === "REFRESH_MESSAGES") {
             setMessagesRefresh(true);
         } else if (message === "MESSAGE_TYPING_START") {
@@ -154,8 +130,6 @@ function WorkspacePage() {
                 const parsedResponse = JSON.parse(response.data);
                 onMessageHandler(parsedResponse);
             }
-
-
         }
         return () => {
             console.log("clean up");
@@ -218,34 +192,25 @@ function WorkspacePage() {
 
     }, [webSocketSendMessageRequestState])
 
-
-    const fetchWorkspace = () => {
-        const workspaceId = location.pathname.split("/")[3]
-        axios.get("/api/workspaces/" + workspaceId).then((response) => {
-            if (response.data.isSuccess) {
-                setWorkspace(response.data.result);
-                setIsWorkspaceLoading(false);
-            }
-        }).catch((error) => {
-
-        });
-    }
-
-    const fetchUser = () => {
-        axios.get("/api/users/me").then((response) => {
-            if (response.data.isSuccess) {
-                setUser(response.data.result);
-            }
-        }).catch((error) => {
-
-        });
-    }
-
-
+    //최초 수행
     useEffect(() => {
-        fetchWorkspace();
-        fetchChannels("first");
-        fetchUser();
+        //워크스페이스 정보 가져오기
+        const workspaceId = location.pathname.split("/")[3];
+        getWorkspace(workspaceId).then((workspace) => {
+            setWorkspace(workspace);
+            setIsWorkspaceLoading(false);
+        })
+
+
+        //채널 정보 가져오기
+        getChannelsByWorkspaceId().then((res) => {
+           setChannels(res);
+           setCurrentChannel(res[0]);
+           setIsChannelLoading(false);
+        });
+
+        //유저 정보 가져오기
+        getUser().then(setUser);
     }, []);
 
 
@@ -259,7 +224,8 @@ function WorkspacePage() {
             </MainSection>
         </>
     } else {
-        content = <>
+        content =
+        <>
             <Sidebar channelState={channelState} workspace={workspace}></Sidebar>
             <MainSection>
                 <ChannelSection channelState={channelState} workspace={workspace}></ChannelSection>

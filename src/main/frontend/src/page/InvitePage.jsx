@@ -3,6 +3,7 @@ import styled from "styled-components";
 import {useEffect, useState} from "react";
 import axios from "axios";
 import {useLocation, useNavigate} from "react-router-dom";
+import {getUser} from "../api/user";
 
 const Wrapper = styled.div`
     padding-left:80px;
@@ -39,12 +40,10 @@ function InvitePage() {
 
     const loginCheck = () => {
         console.log("loginCheck")
-        axios.get("/api/users/me").then((response) => {
-            if(response.data.isSuccess) {
-                setIsLogined(true);
-            } else {
-                setIsLogined(false);
-            }
+        getUser().then(res => {
+            setIsLogined(true);
+        }).catch((error) => {
+            setIsLogined(false);
         });
     }
 
@@ -102,7 +101,7 @@ function InvitePage() {
             setContent(
                 <>
                 <Title>참가 실패</Title>
-            <SubTitle>모종의 이유로 워크스페이스 참가에 실패했습니다.</SubTitle>
+            <SubTitle>{error.data.message}</SubTitle>
             </>
             );
         });

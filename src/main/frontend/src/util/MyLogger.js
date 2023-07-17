@@ -27,6 +27,12 @@ class MyLogger {
             }
         }
     }
+
+    static error(code,message) {
+        if(this.level <= 2) {
+            console.error("ERROR : "+code+" , "+message);
+        }
+    }
 }
 
 export default MyLogger;

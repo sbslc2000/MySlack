@@ -4,6 +4,7 @@ import axios from "axios";
 import {useLocation} from "react-router-dom";
 import {ChannelContext, RefreshContext, WebSocketSendMessageRequestContext} from "../../../page/WorkspacePage";
 import MyLogger from "../../../util/MyLogger";
+import {postMessage} from "../../../api/message";
 
 const Wrapper = styled.div`
     padding-left:20px;
@@ -151,8 +152,6 @@ function MessageForm() {
         webSocketSendMessageRequestContext.setSendTypingEndMessage(true);
     }
 
-
-
     const onSubmitHandler = (e) => {
         e.preventDefault();
         sendMessageRequest();
@@ -161,13 +160,12 @@ function MessageForm() {
 
     const sendMessageRequest = () => {
         console.log("send message request");
-        axios.post("/api/workspaces/"+workspaceId+"/channels/"+channelId+"/messages", {
+        postMessage({
             content: message
-        }).then((response) => {
-            console.log(response.data)
-        }).catch((error) => {
-            console.log(error);
-        });
+        }, workspaceId, channelId).catch(error => {
+                //error Handling
+            }
+        );
     }
 
     return (

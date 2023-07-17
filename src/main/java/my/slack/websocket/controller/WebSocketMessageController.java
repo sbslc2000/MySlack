@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import my.slack.domain.user.UserService;
 import my.slack.domain.user.model.User;
+import my.slack.domain.workspace.WorkspaceRepository;
 import my.slack.domain.workspace.WorkspaceService;
+import my.slack.domain.workspace.model.Workspace;
 import my.slack.websocket.annotation.MessageMapping;
 import my.slack.websocket.annotation.ResponseMessage;
 import my.slack.websocket.annotation.WebSocketSessionAttribute;
@@ -23,6 +25,7 @@ public class WebSocketMessageController {
     private final ObjectMapper objectMapper;
     private final WorkspaceService workspaceService;
     private final UserService userService;
+    private final WorkspaceRepository workspaceRepository;
 
     @MessageMapping("MESSAGE_TYPING_START")
     @ResponseMessage("MESSAGE_TYPING_START")
@@ -31,7 +34,13 @@ public class WebSocketMessageController {
                                     String userId,
                                     Long channelId) throws JsonProcessingException {
 
-        workspaceService.findById(workspaceId).getUsers().stream()
+        Workspace workspace = workspaceRepository.findById(workspaceId)
+                .orElseThrow(
+                        () -> new IllegalArgumentException("존재하지 않는 워크스페이스입니다."));
+
+
+
+        workspace.getUsers().stream()
                 .filter(user -> !user.getId().equals(userId))
                 .forEach(user -> targetUsers.add(user));
 
@@ -52,7 +61,12 @@ public class WebSocketMessageController {
                                     String userId,
                                     Long channelId) throws JsonProcessingException {
 
-        workspaceService.findById(workspaceId).getUsers().stream()
+
+        Workspace workspace = workspaceRepository.findById(workspaceId)
+                .orElseThrow(
+                        () -> new IllegalArgumentException("존재하지 않는 워크스페이스입니다."));
+
+        workspace.getUsers().stream()
                 .filter(user -> !user.getId().equals(userId))
                 .forEach(user -> targetUsers.add(user));
 
