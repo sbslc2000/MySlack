@@ -18,6 +18,11 @@ public class MessageController {
     private final MessageService messageService;
 
 
+    /**
+     * fix me: 추후 사용자에 대한 validation 추가로 필요함
+     * @param channelId
+     * @return
+     */
     @GetMapping
     public BaseResponse<List<MessageDto>> getMessages(@PathVariable Long channelId) {
         return new BaseResponse<>(messageService.getMessagesByChannel(channelId));

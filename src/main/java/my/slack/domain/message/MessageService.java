@@ -4,9 +4,10 @@ package my.slack.domain.message;
 import lombok.RequiredArgsConstructor;
 import my.slack.api.ErrorCode;
 import my.slack.api.exception.ClientFaultException;
-import my.slack.api.exception.ServerFaultException;
 import my.slack.domain.channel.ChannelRepository;
+import my.slack.domain.channel.MemoryChannelRepository;
 import my.slack.domain.channel.model.Channel;
+import my.slack.domain.user.MemoryUserRepository;
 import my.slack.domain.user.UserRepository;
 import my.slack.domain.user.model.User;
 import my.slack.domain.workspace.WorkspaceRepository;
@@ -15,12 +16,14 @@ import my.slack.websocket.WebSocketMessageSender;
 import my.slack.websocket.model.WebSocketMessageRequest;
 import my.slack.websocket.service.ActiveUserService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class MessageService {
     private final WorkspaceRepository workspaceRepository;
     private final ChannelRepository channelRepository;
@@ -29,27 +32,37 @@ public class MessageService {
     private final ActiveUserService activeUserService;
     private final WebSocketMessageSender webSocketMessageSender;
 
-    public Long addMessage(String userId, Long channelId, MessageCreateRequestDto messageCreateRequestDto) {
+    /**
+     * 
+     * @param userId
+     * @param channelId
+     * @param messageCreateRequestDto
+     * @return
+     * 
+     * fix me
+     * 데이터 가져오는 부분 JPA 적용으로 인해 바뀔 필요 있음
+     */
+    public MessageDto addMessage(String userId, Long channelId, MessageCreateRequestDto messageCreateRequestDto) {
 
 
         Channel channel = channelRepository.findById(channelId)
                 .orElseThrow(() -> new ClientFaultException(ErrorCode.ENTITY_NOT_FOUND, "존재하지 않는 채널입니다."));
 
-        Workspace workspace = workspaceRepository.findById(channel.getWorkspaceId())
-                .orElseThrow(() -> new ServerFaultException(ErrorCode.DATA_INTEGRITY_FAILURE, "존재하지 않는 워크스페이스입니다. 데이터 무결성이 깨졌습니다."));
+        Workspace workspace = channel.getWorkspace();
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ClientFaultException(ErrorCode.ENTITY_NOT_FOUND, "존재하지 않는 사용자입니다."));
 
-        Message message = new Message(user, channelId, messageCreateRequestDto.getContent());
 
+        Message message = new Message(user, channel, messageCreateRequestDto.getContent());
+        Message createdMessage = messageRepository.save(message);
 
+        //channel.addMessage(message);
 
-        channel.addMessage(message);
-        Long messageId = messageRepository.save(message);
 
         notifyMessageCreated(workspace,channelId);
-        return messageId;
+
+        return MessageDto.of(createdMessage);
     }
 
     private void notifyMessageCreated(Workspace workspace,Long channelId) {

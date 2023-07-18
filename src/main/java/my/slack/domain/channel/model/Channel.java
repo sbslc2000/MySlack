@@ -1,44 +1,58 @@
 package my.slack.domain.channel.model;
 
+import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import my.slack.common.model.BaseTimeEntity;
 import my.slack.domain.message.Message;
 import my.slack.domain.user.model.User;
+import my.slack.domain.workspace.model.Workspace;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-public class Channel {
+@Entity
+@NoArgsConstructor
+public class Channel extends BaseTimeEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
     private String description;
+
+    @ManyToOne
+    @JoinColumn(name = "creator_id")
     private User creator;
-    private String workspaceId;
-    private List<User> members;
-    private LocalDateTime createdAt;
+
+    @ManyToOne
+    @Setter
+    @JoinColumn(name = "workspace_id")
+    private Workspace workspace;
+
+    @OneToMany(mappedBy = "channel")
     private List<Message> messages = new ArrayList<>();
+
     private boolean isPrivate;
 
-    public Channel(String workspaceId,User creator,String name,String description, List<User> members, boolean isPrivate) {
-        this.workspaceId = workspaceId;
+
+    public Channel(Workspace workspace,User creator,String name,String description, boolean isPrivate) {
+        this.workspace = workspace;
         this.creator = creator;
         this.name = name;
         this.description = description;
-        this.members = members;
-        this.createdAt = LocalDateTime.now();
         this.isPrivate = isPrivate;
     }
 
     public void addMessage(Message message) {
         messages.add(message);
+        message.setChannel(this);
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public void addMember(User user) {
-        members.add(user);
     }
 }

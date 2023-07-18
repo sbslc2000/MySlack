@@ -7,6 +7,7 @@ import my.slack.domain.channel.model.ChannelCreateRequestDto;
 import my.slack.domain.channel.model.ChannelDto;
 import my.slack.domain.user.UserService;
 import my.slack.domain.user.model.User;
+import my.slack.domain.workspace.MemoryWorkspaceRepository;
 import my.slack.domain.workspace.WorkspaceRepository;
 import my.slack.domain.workspace.model.Workspace;
 import my.slack.websocket.WebSocketMessageSender;
@@ -16,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static my.slack.api.ErrorCode.*;
 
@@ -41,8 +41,6 @@ public class ChannelService {
         //    throw new ClientFaultException(FORBIDDEN, "워크스페이스의 매니저만 채널을 생성할 수 있습니다.");
         //}
 
-        //Channel 생성
-        List<User> initialMembers;
 
         //if(channelCreateRequestDto.isPrivate()) {
         //initialMembers = channelCreateRequestDto.getInitialMembers()
@@ -53,10 +51,8 @@ public class ChannelService {
         //
         // }
 
-        initialMembers = workspace.getUsers().stream().collect(Collectors.toList());
 
-
-        Channel channel = new Channel(workspace.getId(), creator, channelCreateRequestDto.getName(), channelCreateRequestDto.getDescription(), initialMembers, channelCreateRequestDto.isPrivate());
+        Channel channel = new Channel(workspace, creator, channelCreateRequestDto.getName(), channelCreateRequestDto.getDescription(),  channelCreateRequestDto.isPrivate());
         channelRepository.save(channel);
 
         //Workspace 에 채널 추가
@@ -88,8 +84,13 @@ public class ChannelService {
         Channel channel = channelRepository.findById(channelId)
                 .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 채널입니다."));
 
+        /*
         Workspace workspace = workspaceRepository.findById(channel.getWorkspaceId())
                 .orElseThrow(() -> new ClientFaultException(DATA_INTEGRITY_FAILURE, "존재하지 않는 워크스페이스입니다. 데이터 무결성이 깨졌습니다."));
+
+         */
+
+        Workspace workspace = channel.getWorkspace();
 
         if(!workspace.getManagers().contains(deleter)) {
             throw new ClientFaultException(FORBIDDEN, "워크스페이스의 매니저만 채널을 삭제할 수 있습니다.");

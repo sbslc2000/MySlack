@@ -30,22 +30,24 @@ public class ActiveUserService {
         return Collections.unmodifiableList(activeUsers.values().stream().toList());
     }
 
-    public void setConnect(String userId) {
+    public User setConnect(String userId) {
         //접속한 유저정보 확인
         User accessUser = userService.findById(userId);
 
         //ActiveUser Map에 user 추가, User의 active 상태 변경
         activeUsers.put(userId, accessUser);
-        accessUser.setActive(true);
+        accessUser.setStatus(true);
+        return accessUser;
     }
 
-    public void setDisconnect(String userId) {
+    public User setDisconnect(String userId) {
         //접속한 유저정보 확인
         User accessUser = userService.findById(userId);
 
         //ActiveUser Map에 user 추가, User의 active 상태 변경
         activeUsers.remove(userId);
-        accessUser.setActive(false);
+        accessUser.setStatus(false);
+        return accessUser;
     }
 
 

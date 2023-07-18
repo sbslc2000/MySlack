@@ -1,30 +1,6 @@
 package my.slack.domain.message;
 
-import my.slack.domain.channel.model.Channel;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-
-@Repository
-public class MessageRepository {
-
-    private Long sequence = 1L;
-    private Map<Long,Message> repository = new ConcurrentHashMap<>();
-
-    public Long save(Message message) {
-        message.setId(sequence++);
-        repository.put(message.getId(), message);
-        return message.getId();
-    }
-
-    public Optional<Message> findById(Long id) {
-        return Optional.ofNullable(repository.get(id));
-    }
-
-    public void delete(Message message) {
-        repository.remove(message.getId());
-    }
+public interface MessageRepository extends JpaRepository<Message,Long> {
 }

@@ -23,7 +23,6 @@ public class ChannelDto {
         channelDto.name = channel.getName();
         channelDto.description = channel.getDescription();
         channelDto.creator = channel.getCreator();
-        channelDto.members = channel.getMembers();
         channelDto.createdAt = channel.getCreatedAt();
         return channelDto;
     }

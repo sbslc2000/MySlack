@@ -168,7 +168,7 @@ public class WebSocketDispatcher {
 
         //요청 전송
         //응답은 컨트롤러의 반환값으로, 이것을 웹소켓 응답의 body에 담아서 전송
-        Object responseBody = (Object) mappingInfo.getMethod()
+        Object responseBody = mappingInfo.getMethod()
                 .invoke(ac.getBean(beanName), parsedParameters);
 
 

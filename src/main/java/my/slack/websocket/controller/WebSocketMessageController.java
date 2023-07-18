@@ -6,20 +6,21 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import my.slack.domain.user.UserService;
 import my.slack.domain.user.model.User;
+import my.slack.domain.workspace.MemoryWorkspaceRepository;
 import my.slack.domain.workspace.WorkspaceRepository;
 import my.slack.domain.workspace.WorkspaceService;
 import my.slack.domain.workspace.model.Workspace;
 import my.slack.websocket.annotation.MessageMapping;
 import my.slack.websocket.annotation.ResponseMessage;
 import my.slack.websocket.annotation.WebSocketSessionAttribute;
-import my.slack.websocket.model.requestDto.WebSocketMessageTypingStartRequestDto;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.awt.desktop.UserSessionEvent;
 import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Transactional
 public class WebSocketMessageController {
 
     private final ObjectMapper objectMapper;

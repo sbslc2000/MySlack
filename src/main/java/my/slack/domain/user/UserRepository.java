@@ -1,26 +1,7 @@
 package my.slack.domain.user;
 
 import my.slack.domain.user.model.User;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-
-@Repository
-public class UserRepository {
-    private Map<String, User> repository = new ConcurrentHashMap<>();
-
-    public Optional<User> findById(String id) {
-        return Optional.ofNullable(repository.get(id));
-    }
-
-    public String createUser(User user) {
-        repository.put(user.getId(), user);
-        return user.getId();
-    }
-
-    public void deleteUser(User user) {
-        repository.remove(user.getId());
-    }
+public interface UserRepository extends JpaRepository<User,String> {
 }

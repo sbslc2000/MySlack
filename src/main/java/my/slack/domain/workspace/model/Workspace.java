@@ -1,31 +1,43 @@
 package my.slack.domain.workspace.model;
 
+import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import my.slack.common.model.BaseTimeEntity;
 import my.slack.domain.channel.model.Channel;
+import my.slack.domain.member.Manager;
+import my.slack.domain.member.Member;
 import my.slack.domain.user.model.User;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
 @Getter
-public class Workspace {
+@Entity
+@NoArgsConstructor
+public class Workspace extends BaseTimeEntity {
+    @Id
     private String id;
     private String name;
+
+    @ManyToOne
+    @JoinColumn(name = "creator_id")
     private User creator;
-    private List<User> managers = new ArrayList<>();
-    private List<User> members = new ArrayList<>();
+
+    @OneToMany(mappedBy = "workspace")
+    private List<Manager> managers = new ArrayList<>();
+
+    @OneToMany(mappedBy = "workspace")
+    private List<Member> members = new ArrayList<>();
+
+    @OneToMany(mappedBy = "workspace")
     private List<Channel> channels = new ArrayList<>();
-    private LocalDateTime createdAt;
-
-    private List<String> permittedUserEmail = new ArrayList<>();
-
-    public boolean isPermittedEmail(String email) {
-        return permittedUserEmail.contains(email);
-    }
 
     public boolean hasAuthority(User user) {
         return user.equals(creator) || managers.contains(user);
@@ -33,9 +45,9 @@ public class Workspace {
 
 
     public Workspace(User creator, String name) {
+        this.id = UUID.randomUUID().toString();
         this.name = name;
         this.creator = creator;
-        this.createdAt = LocalDateTime.now();
     }
 
     public void setId(String id) {
@@ -44,17 +56,19 @@ public class Workspace {
 
     public void addChannel(Channel channel) {
         channels.add(channel);
+        channel.setWorkspace(this);
     }
 
     public List<User> getUsers() {
-        List<User> users = Stream.concat(managers.stream(), members.stream()).distinct()
+        List<User> users = Stream.concat(managers.stream().map(Manager::getUser), members.stream().map(Member::getUser)).distinct()
                 .collect(Collectors.toList());
         users.add(creator);
         return users;
     }
 
     public void addUser(User user) {
-        members.add(user);
+        Member member = new Member(this, user);
+        members.add(member);
     }
 
     public boolean hasUser(String userId) {
@@ -63,11 +77,13 @@ public class Workspace {
                 .findFirst().isPresent();
     }
 
-    public void addManager(User user) {
-        managers.add(user);
+    public void addManager(Manager manager) {
+        managers.add(manager);
+
     }
 
     public void removeChannel(Channel channel) {
+        channel.setWorkspace(null);
         channels.remove(channel);
     }
 
