@@ -1,11 +1,9 @@
 package my.slack.domain.channel.model;
 
 import lombok.Getter;
-import my.slack.domain.message.Message;
 import my.slack.domain.user.model.User;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter

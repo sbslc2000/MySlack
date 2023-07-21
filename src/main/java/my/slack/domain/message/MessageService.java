@@ -5,9 +5,11 @@ import lombok.RequiredArgsConstructor;
 import my.slack.api.ErrorCode;
 import my.slack.api.exception.ClientFaultException;
 import my.slack.domain.channel.ChannelRepository;
-import my.slack.domain.channel.MemoryChannelRepository;
 import my.slack.domain.channel.model.Channel;
-import my.slack.domain.user.MemoryUserRepository;
+import my.slack.domain.message.model.Message;
+import my.slack.domain.message.model.MessageCreateRequestDto;
+import my.slack.domain.message.model.MessageDto;
+import my.slack.domain.message.model.MessageNotifyDto;
 import my.slack.domain.user.UserRepository;
 import my.slack.domain.user.model.User;
 import my.slack.domain.workspace.WorkspaceRepository;
@@ -35,17 +37,16 @@ public class MessageService {
     /**
      * 
      * @param userId
-     * @param channelId
      * @param messageCreateRequestDto
      * @return
      * 
      * fix me
      * 데이터 가져오는 부분 JPA 적용으로 인해 바뀔 필요 있음
      */
-    public MessageDto addMessage(String userId, Long channelId, MessageCreateRequestDto messageCreateRequestDto) {
+    public MessageDto addMessage(String userId, MessageCreateRequestDto messageCreateRequestDto) {
 
 
-        Channel channel = channelRepository.findById(channelId)
+        Channel channel = channelRepository.findById(messageCreateRequestDto.getChannelId())
                 .orElseThrow(() -> new ClientFaultException(ErrorCode.ENTITY_NOT_FOUND, "존재하지 않는 채널입니다."));
 
         Workspace workspace = channel.getWorkspace();
@@ -53,6 +54,9 @@ public class MessageService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ClientFaultException(ErrorCode.ENTITY_NOT_FOUND, "존재하지 않는 사용자입니다."));
 
+        if(!workspace.hasUser(user.getId())) {
+            throw new ClientFaultException(ErrorCode.FORBIDDEN, "메시지를 보낼 수 있는 사용자가 아닙니다.");
+        }
 
         Message message = new Message(user, channel, messageCreateRequestDto.getContent());
         Message createdMessage = messageRepository.save(message);
@@ -60,7 +64,7 @@ public class MessageService {
         //channel.addMessage(message);
 
 
-        notifyMessageCreated(workspace,channelId);
+        notifyMessageCreated(workspace,channel.getId());
 
         return MessageDto.of(createdMessage);
     }
@@ -82,10 +86,8 @@ public class MessageService {
     }
 
     public List<MessageDto> getMessagesByChannel(Long channelId) {
-        Channel channel = channelRepository.findById(channelId)
-                .orElseThrow(
-                        () -> new ClientFaultException(ErrorCode.ENTITY_NOT_FOUND, "존재하지 않는 채널입니다.")
-                );
+        Channel channel = channelRepository.findById(channelId).orElseThrow(
+                        () -> new ClientFaultException(ErrorCode.ENTITY_NOT_FOUND, "존재하지 않는 채널입니다."));
         return channel.getMessages().stream().map(MessageDto::of).toList();
     }
 

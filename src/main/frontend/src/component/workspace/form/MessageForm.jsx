@@ -154,19 +154,18 @@ function MessageForm() {
 
     const onSubmitHandler = (e) => {
         e.preventDefault();
-        sendMessageRequest();
-        setMessage("");
-    }
 
-    const sendMessageRequest = () => {
-        console.log("send message request");
         postMessage({
+            channelId: channelId,
             content: message
         }, workspaceId, channelId).catch(error => {
                 //error Handling
             }
         );
+
+        setMessage("");
     }
+
 
     return (
         <Wrapper>

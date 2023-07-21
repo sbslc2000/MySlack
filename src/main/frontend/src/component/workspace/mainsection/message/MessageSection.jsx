@@ -75,7 +75,7 @@ function MessageSection(props) {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        getMessages(workspaceId,channelId).then((messages) => {
+        getMessages(channelId).then((messages) => {
             setMessages(messages);
             setIsLoading(false);
         });

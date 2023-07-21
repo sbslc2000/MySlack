@@ -5,11 +5,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import my.slack.common.model.BaseTimeEntity;
-import my.slack.domain.message.Message;
+import my.slack.domain.message.model.Message;
 import my.slack.domain.user.model.User;
 import my.slack.domain.workspace.model.Workspace;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 

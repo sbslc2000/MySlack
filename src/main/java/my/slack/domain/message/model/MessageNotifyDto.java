@@ -1,4 +1,4 @@
-package my.slack.domain.message;
+package my.slack.domain.message.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,6 +1,6 @@
 package my.slack.domain.message;
 
-import org.springframework.stereotype.Repository;
+import my.slack.domain.message.model.Message;
 
 import java.util.Map;
 import java.util.Optional;
@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MemoryMessageRepository {
 
     private Long sequence = 1L;
-    private Map<Long,Message> repository = new ConcurrentHashMap<>();
+    private Map<Long, Message> repository = new ConcurrentHashMap<>();
 
     public Long save(Message message) {
         message.setId(sequence++);
