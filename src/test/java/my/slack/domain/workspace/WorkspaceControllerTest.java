@@ -3,6 +3,8 @@ package my.slack.domain.workspace;
 import jakarta.transaction.Transactional;
 import my.slack.api.response.BaseResponse;
 import my.slack.domain.user.model.User;
+import my.slack.domain.workspace.model.Workspace;
+import my.slack.domain.workspace.model.WorkspaceCreateRequestDto;
 import my.slack.domain.workspace.model.WorkspaceDto;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -23,6 +25,9 @@ class WorkspaceControllerTest {
 
     @Autowired
     private WorkspaceController workspaceController;
+
+    @Autowired
+    private WorkspaceRepository workspaceRepository;
 
     @Test
     @DisplayName("워크스페이스 조회 테스트 : 성공")
@@ -60,6 +65,26 @@ class WorkspaceControllerTest {
 
     @Test
     void createWorkspace() {
+
+        //given
+        long before = workspaceRepository.count();
+        WorkspaceCreateRequestDto dto = new WorkspaceCreateRequestDto("newWorkspace", null, "기록");
+
+        //when
+        BaseResponse<WorkspaceDto> response = workspaceController.createWorkspace("user1", dto);
+
+        //then
+
+        long after = workspaceRepository.count();
+        WorkspaceDto workspaceDto = (WorkspaceDto)response.getResult();
+
+        Workspace workspace = workspaceRepository.findById(workspaceDto.getId())
+                .get();
+
+        assertThat(workspaceDto.getCreator().getId()).isEqualTo("user1");
+        assertThat(workspaceDto.getName()).isEqualTo("newWorkspace");
+        assertThat(after).isEqualTo(before+1);
+        assertThat(workspace.getChannels().size()).isEqualTo(1);
     }
 
     @Test

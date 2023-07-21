@@ -40,7 +40,7 @@ function WorkspaceCreatePage() {
 
         setIsLoading(true);
         axios.post("/api/workspaces", workspaceCreateRequestDto).then((response) => {
-            setCreatedWorkspaceId(response.data.result);
+            setCreatedWorkspaceId(response.data.result.id);
             console.log(createdWorkspaceId);
             setIsLoading(false);
         }).catch((error) => {

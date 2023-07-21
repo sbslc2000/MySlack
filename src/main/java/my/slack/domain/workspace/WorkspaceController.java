@@ -39,9 +39,9 @@ public class WorkspaceController {
     }
 
     @PostMapping
-    public BaseResponse<String> createWorkspace(@SessionAttribute(name="userId") String creatorId,@RequestBody WorkspaceCreateRequestDto workspaceCreateRequestDto) {
-        String createdWorkspaceId = workspaceService.createWorkspace(creatorId, workspaceCreateRequestDto);
-        return new BaseResponse<>(createdWorkspaceId);
+    public BaseResponse<WorkspaceDto> createWorkspace(@SessionAttribute(name="userId") String creatorId,@RequestBody WorkspaceCreateRequestDto workspaceCreateRequestDto) {
+        WorkspaceDto workspaceDto = workspaceService.createWorkspace(creatorId, workspaceCreateRequestDto);
+        return new BaseResponse<>(workspaceDto);
     }
 
     @DeleteMapping("/{workspaceId}")

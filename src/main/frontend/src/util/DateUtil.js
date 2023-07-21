@@ -24,6 +24,8 @@ class DateUtil {
         let minute = date.getMinutes();
         let ampm = hour >= 12 ? "오후" : "오전";
         hour = hour % 12;
+        if(hour < 10) hour = "0" + hour;
+        if(minute < 10) minute = "0" + minute;
         return ampm + " " + hour + ":" + minute;
     }
 }

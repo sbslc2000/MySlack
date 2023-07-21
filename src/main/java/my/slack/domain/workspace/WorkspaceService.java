@@ -30,7 +30,7 @@ public class WorkspaceService {
     private final ChannelService channelService;
     private final MemberRepository memberRepository;
 
-    public String createWorkspace(String creatorId, WorkspaceCreateRequestDto workspaceCreateRequestDto) {
+    public WorkspaceDto createWorkspace(String creatorId, WorkspaceCreateRequestDto workspaceCreateRequestDto) {
 
         User creator = userRepository.findById(creatorId)
                 .orElseThrow(
@@ -38,14 +38,16 @@ public class WorkspaceService {
 
         //workspace 생성
         Workspace workspace = new Workspace(creator, workspaceCreateRequestDto.getName());
-        workspaceRepository.save(workspace);
+        Workspace savedWorkspace = workspaceRepository.save(workspace);
 
         //요청받은 채널 생성
         String workspaceId = workspace.getId();
         ChannelCreateRequestDto channelCreateRequestDto = new ChannelCreateRequestDto(workspaceCreateRequestDto.getChannel(), "", false);
         channelService.createChannel(workspaceId, creatorId, channelCreateRequestDto);
 
-        return workspaceId;
+
+
+        return WorkspaceDto.of(savedWorkspace);
     }
 
     public List<WorkspaceDto> getUserWorkspaces(String userId) {
