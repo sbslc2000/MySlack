@@ -27,7 +27,8 @@ public class ActiveUserService {
     private Map<String, User> activeUsers = new ConcurrentHashMap<>();
 
     public List<User> getActiveUsers() {
-        return Collections.unmodifiableList(activeUsers.values().stream().toList());
+        //unmodifiableList
+        return activeUsers.values().stream().toList();
     }
 
     public User setConnect(String userId) {

@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class Initializer implements ApplicationRunner {
 
-    /*
     @Value("${my.nickname}")
     private String nickname;
     @Value("${my.email}")

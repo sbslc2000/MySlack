@@ -2,11 +2,13 @@ package my.slack.domain.user.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Getter
 @Entity
+@Data
 @NoArgsConstructor
 public class User {
     @Id
