@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.ToString;
 
 @JsonPropertyOrder({"isSuccess","message","result"})
-public class BaseResponse<T> extends BaseResponseTemplate{
+public class BaseResponse<T> extends BaseResponseTemplate<T>{
 
     private static final String DEFAULT_MESSAGE = "요청에 성공하였습니다.";
 

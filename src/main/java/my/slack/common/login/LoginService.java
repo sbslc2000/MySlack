@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import my.slack.common.login.model.LoginInfo;
 import my.slack.domain.user.UserService;
 import org.springframework.core.env.Environment;
 import org.springframework.http.*;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
+import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -41,10 +44,9 @@ public class LoginService {
 
             userService.createUser(id, email, nickname,profileImage);
         }
-
-
         //로그인
-        session.setAttribute("userId", id);
+        LoginInfo loginInfo = new LoginInfo(id, LocalDateTime.now(), LocalDateTime.now());
+        session.setAttribute("loginInfo", loginInfo);
         log.info("로그인 성공 : userId = {}", id);
     }
 

@@ -3,6 +3,7 @@ package my.slack.domain.workspace;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import my.slack.api.response.BaseResponse;
+import my.slack.common.login.LoginUser;
 import my.slack.domain.channel.model.ChannelDto;
 import my.slack.domain.user.model.User;
 import my.slack.domain.workspace.model.Workspace;
@@ -34,26 +35,26 @@ public class WorkspaceController {
     }
 
     @GetMapping("/{workspaceId}/users")
-    public BaseResponse<List<User>> getMembersByWorkspace(@PathVariable String workspaceId,@SessionAttribute(name="userId") String userId) {
-        return new BaseResponse<>(workspaceService.getUsersByWorkspace(workspaceId, userId));
+    public BaseResponse<List<User>> getMembersByWorkspace(@PathVariable String workspaceId,@LoginUser User loginUser) {
+        return new BaseResponse<>(workspaceService.getUsersByWorkspace(workspaceId, loginUser.getId()));
     }
 
     @PostMapping
-    public BaseResponse<WorkspaceDto> createWorkspace(@SessionAttribute(name="userId") String creatorId,@RequestBody WorkspaceCreateRequestDto workspaceCreateRequestDto) {
-        WorkspaceDto workspaceDto = workspaceService.createWorkspace(creatorId, workspaceCreateRequestDto);
+    public BaseResponse<WorkspaceDto> createWorkspace(@LoginUser User loginUser, @RequestBody WorkspaceCreateRequestDto workspaceCreateRequestDto) {
+        WorkspaceDto workspaceDto = workspaceService.createWorkspace(loginUser.getId(), workspaceCreateRequestDto);
         return new BaseResponse<>(workspaceDto);
     }
 
     @DeleteMapping("/{workspaceId}")
-    public BaseResponse<String> deleteWorkspace(@SessionAttribute(name="userId") String deleterId, @PathVariable String workspaceId) {
-        workspaceService.deleteWorkspace(workspaceId, deleterId);
+    public BaseResponse<String> deleteWorkspace(@LoginUser User loginUser, @PathVariable String workspaceId) {
+        workspaceService.deleteWorkspace(workspaceId, loginUser.getId());
         return new BaseResponse<>("삭제되었습니다.");
     }
 
     @PostMapping("/{workspaceId}/users")
-    public BaseResponse<String> addUserToWorkspace(@SessionAttribute("userId") String userId, @PathVariable String workspaceId) {
+    public BaseResponse<String> addUserToWorkspace(@LoginUser User loginUser, @PathVariable String workspaceId) {
         log.info("/api/workspaces/{}/users", workspaceId);
-        workspaceService.enterWorkspace(userId, workspaceId);
+        workspaceService.enterWorkspace(loginUser.getId(), workspaceId);
         return new BaseResponse<>("추가되었습니다.");
     }
 

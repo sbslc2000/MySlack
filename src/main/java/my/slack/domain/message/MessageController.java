@@ -3,8 +3,10 @@ package my.slack.domain.message;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import my.slack.api.response.BaseResponse;
+import my.slack.common.login.LoginUser;
 import my.slack.domain.message.model.MessageCreateRequestDto;
 import my.slack.domain.message.model.MessageDto;
+import my.slack.domain.user.model.User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,9 +32,9 @@ public class MessageController {
 
     @PostMapping
     public BaseResponse<String> sendMessage(@RequestBody MessageCreateRequestDto messageCreateRequestDto,
-                                            @SessionAttribute("userId") String userId) {
+                                            @LoginUser User loginUser) {
         log.info("message create request");
-        messageService.addMessage(userId,messageCreateRequestDto);
+        messageService.addMessage(loginUser.getId(),messageCreateRequestDto);
         return new BaseResponse<>("메시지를 보냈습니다.");
     }
 

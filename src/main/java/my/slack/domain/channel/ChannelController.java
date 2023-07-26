@@ -2,8 +2,10 @@ package my.slack.domain.channel;
 
 import lombok.RequiredArgsConstructor;
 import my.slack.api.response.BaseResponse;
+import my.slack.common.login.LoginUser;
 import my.slack.domain.channel.model.ChannelCreateRequestDto;
 import my.slack.domain.channel.model.ChannelDto;
+import my.slack.domain.user.model.User;
 import my.slack.domain.workspace.WorkspaceService;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,20 +21,22 @@ public class ChannelController {
     private final WorkspaceService workspaceService;
 
     @PostMapping
-    public BaseResponse<String> addChannel(@PathVariable String workspaceId, @RequestBody ChannelCreateRequestDto channelCreateRequestDto, @SessionAttribute("userId") String userId) {
-        Long createdChannelId = channelService.createChannel(workspaceId,userId,channelCreateRequestDto);
+    public BaseResponse<String> addChannel(@PathVariable String workspaceId, @RequestBody ChannelCreateRequestDto channelCreateRequestDto,
+                                           @LoginUser User loginUser) {
+        Long createdChannelId = channelService.createChannel(workspaceId,loginUser.getId(),channelCreateRequestDto);
         return new BaseResponse<>(createdChannelId.toString());
     }
 
     @GetMapping
-    public BaseResponse<List<ChannelDto>> getChannelsByWorkspace(@PathVariable String workspaceId, @SessionAttribute("userId") String userId) {
-        List<ChannelDto> channelDtos = channelService.getChannelsByWorkspaceId(workspaceId,userId);
+    public BaseResponse<List<ChannelDto>> getChannelsByWorkspace(@PathVariable String workspaceId,
+                                                                 @LoginUser User loginUser) {
+        List<ChannelDto> channelDtos = channelService.getChannelsByWorkspaceId(workspaceId,loginUser.getId());
         return new BaseResponse<>(channelDtos);
     }
 
     @DeleteMapping("/{channelId}")
-    public BaseResponse<String> deleteChannel(@PathVariable Long channelId, @SessionAttribute("userId") String userId) {
-        channelService.deleteChannel(channelId,userId);
+    public BaseResponse<String> deleteChannel(@PathVariable Long channelId, @LoginUser User loginUser) {
+        channelService.deleteChannel(channelId,loginUser.getId());
         return new BaseResponse<>("삭제되었습니다.");
     }
 

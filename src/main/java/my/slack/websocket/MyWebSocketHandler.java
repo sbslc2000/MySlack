@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import my.slack.common.login.model.LoginInfo;
 import my.slack.websocket.dispatcher.WebSocketDispatcher;
 import my.slack.websocket.model.WebSocketMessageRequest;
 import my.slack.websocket.service.ActiveUserService;
@@ -29,13 +30,11 @@ public class MyWebSocketHandler extends TextWebSocketHandler implements WebSocke
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        log.info("userId={}",session.getAttributes().get("userId"));
 
         sessions.add(session);
         log.info(session.getId()+" 연결됨");
 
         handleRequest(session,"USER_CONNECT");
-
         super.afterConnectionEstablished(session);
     }
 
@@ -110,6 +109,8 @@ public class MyWebSocketHandler extends TextWebSocketHandler implements WebSocke
 
 
     private String getUserIdFromSession(WebSocketSession session) {
-        return (String)session.getAttributes().get("userId");
+        LoginInfo loginInfo = (LoginInfo)session.getAttributes()
+                .get("loginInfo");
+        return loginInfo.getUserId();
     }
 }

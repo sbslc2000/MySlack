@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import my.slack.domain.user.UserRepository;
 import my.slack.domain.user.model.User;
 import my.slack.websocket.annotation.MessageMapping;
 import my.slack.websocket.annotation.ResponseMessage;
@@ -134,6 +135,9 @@ public class WebSocketDispatcher {
             Parameter parameter = parameters[i];
             log.info("parameter {} binding",i);
 
+            //@LoginUser 처리
+
+
             WebSocketSessionAttribute paramAnnotation = parameter.getAnnotation(WebSocketSessionAttribute.class);
             //만약 파라미터에 @WebSocketSessionAttribute 어노테이션이 붙어있다면
             if(paramAnnotation != null) {
@@ -158,6 +162,8 @@ public class WebSocketDispatcher {
                 Object parsedParam = objectMapper.treeToValue(jsonNode, paramType);
                 parsedParameters[i] = parsedParam;
             }
+
+            log.info("binding result = {}", parsedParameters[i]);
 
         }
 

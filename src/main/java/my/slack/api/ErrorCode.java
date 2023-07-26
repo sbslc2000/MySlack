@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum ErrorCode {
+    LOGIN_REQUIRED(2001,"로그인이 필요합니다."),
     INVALID_REQUEST(4000, "유효하지 않은 요청입니다."),
     UNAUTHORIZED(4001, "인증되지 않은 사용자입니다."),
     FORBIDDEN(4002, "권한이 없습니다."),

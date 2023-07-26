@@ -4,6 +4,7 @@ import my.slack.domain.user.model.User;
 import my.slack.domain.workspace.model.Workspace;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -13,5 +14,5 @@ public interface WorkspaceRepository extends JpaRepository<Workspace,String> {
             "WHERE w.creator = :user " +
             "OR :user = ANY (SELECT m.user FROM w.managers m) " +
             "OR :user = ANY (SELECT mem.user FROM w.members mem)")
-    List<Workspace> findByUser(User user);
+    List<Workspace> findByUser(@Param("user") User user);
 }
