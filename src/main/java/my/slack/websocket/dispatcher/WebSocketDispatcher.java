@@ -34,22 +34,22 @@ public class WebSocketDispatcher {
 
     @PostConstruct
     public void init() {
-        log.info("WebSocketDispatcher 초기화 시작");
+        log.info("WebSocketDispatcher Initializing...");
         String packageName = SERVICE_PACKAGE_NAME;
         mappingTable = new MappingTable();
 
         try {
             List<Class<?>> classes = getClassesInPackage(packageName);
-            log.info("Target Classes: {}개", classes.size());
+            log.debug("Target Classes: {}개", classes.size());
             for (Class<?> clazz : classes) {
                 Method[] methods = clazz.getDeclaredMethods();
 
-                log.info("Target Class: {}, Methods: {}개", clazz.getName(), methods.length);
+                log.debug("Target Class: {}, Methods: {}개", clazz.getName(), methods.length);
 
                 for (Method method : methods) {
-                    log.info("Method: {}", method.getName());
+                    log.debug("Method: {}", method.getName());
                     if(method.isSynthetic() || !Modifier.isPublic(method.getModifiers())) {
-                        log.info("이건 패스");
+                        log.debug("이건 패스");
                         continue;
                     }
                     MessageMapping requestMessage = method.getAnnotation(MessageMapping.class);
@@ -74,7 +74,7 @@ public class WebSocketDispatcher {
         ClassLoader classLoader = Thread.currentThread()
                 .getContextClassLoader();
         String path = packageName.replace('.', '/');
-        log.info("path : {}", path);
+        log.debug("path : {}", path);
 
         Enumeration<URL> resources = classLoader.getResources(path);
 
@@ -82,7 +82,7 @@ public class WebSocketDispatcher {
         List<String> resourceNames = new ArrayList<>();
         while(resources.hasMoreElements()) {
             URL resource = resources.nextElement();
-            log.info("resource : {}", resource);
+            log.debug("resource : {}", resource);
             File packageDirectory = new File(resource.getFile());
             if (packageDirectory.exists() && packageDirectory.isDirectory()) {
                 File[] files = packageDirectory.listFiles();
@@ -98,23 +98,23 @@ public class WebSocketDispatcher {
 
         }
 
-        log.info("classNames : {}", resourceNames);
+        log.debug("classNames : {}", resourceNames);
 
         List<Class<?>> classes = new ArrayList<>();
         for (String resourceName : resourceNames) {
             Class<?> clazz = Class.forName(resourceName);
-            log.info("class.getName() = {}",clazz.getName());
+            log.debug("class.getName() = {}",clazz.getName());
             classes.add(clazz);
         }
 
-        log.info("classes : {}", classes);
+        log.debug("classes : {}", classes);
         return classes;
     }
 
 
     public WebSocketMessageRequest dispatch(String userId, String message, JsonNode body) throws Exception {
-        log.info("WebSocketDispatcher.dispatch() 호출");
-        log.info("message = {}", message);
+        log.debug("WebSocketDispatcher.dispatch() 호출");
+        log.debug("message = {}", message);
         MappingInfo mappingInfo = mappingTable.get(message);
         String responseMessage = mappingInfo.getResponseMessage();
         Parameter[] parameters = mappingInfo.getParameters();
@@ -125,7 +125,7 @@ public class WebSocketDispatcher {
         String beanName = className.substring(className.lastIndexOf('.') + 1);  // 패키지 이름 제외
         beanName = beanName.substring(0, 1)
                 .toLowerCase() + beanName.substring(1);  // 첫 문자를 소문자로 변경
-        log.info("beanName = {}" , beanName);
+        log.debug("beanName = {}" , beanName);
 
         //파라미터 파싱 and binding
         Object[] parsedParameters = new Object[parameters.length];
@@ -133,7 +133,7 @@ public class WebSocketDispatcher {
 
         for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];
-            log.info("parameter {} binding",i);
+            log.debug("parameter {} binding",i);
 
             //@LoginUser 처리
 
@@ -142,7 +142,7 @@ public class WebSocketDispatcher {
             //만약 파라미터에 @WebSocketSessionAttribute 어노테이션이 붙어있다면
             if(paramAnnotation != null) {
                 String value = paramAnnotation.value();
-                log.info("value = {}", value);
+                log.debug("value = {}", value);
                 if(value.equals("userId")) {
                     parsedParameters[i] = userId;
                     continue;
@@ -163,23 +163,14 @@ public class WebSocketDispatcher {
                 parsedParameters[i] = parsedParam;
             }
 
-            log.info("binding result = {}", parsedParameters[i]);
+            log.debug("binding result = {}", parsedParameters[i]);
 
-        }
-
-
-        for(Object o : parsedParameters) {
-            log.info("parsedParameters = {}", o);
         }
 
         //요청 전송
         //응답은 컨트롤러의 반환값으로, 이것을 웹소켓 응답의 body에 담아서 전송
         Object responseBody = mappingInfo.getMethod()
                 .invoke(ac.getBean(beanName), parsedParameters);
-
-
-
-
         //결과 반환
         return new WebSocketMessageRequest(responseMessage,responseBody,targetUsers);
     }

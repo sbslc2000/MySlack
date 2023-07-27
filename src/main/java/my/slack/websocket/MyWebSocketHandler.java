@@ -92,7 +92,7 @@ public class MyWebSocketHandler extends TextWebSocketHandler implements WebSocke
         try {
             String jsonDto = objectMapper.writeValueAsString(dto);
             log.info("jsonDto: {}", jsonDto);
-            sessions.stream().filter(s -> targets.contains(s.getAttributes().get("userId"))).forEach(
+            sessions.stream().filter(s -> targets.contains(getUserIdFromSession(s))).forEach(
                     s -> {
                         try {
                             s.sendMessage(new TextMessage(jsonDto));

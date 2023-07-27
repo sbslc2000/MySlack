@@ -92,7 +92,9 @@ function WorkspacePage() {
 
     const onMessageHandler = (response) => {
         const message = response.message;
-        MyLogger.trace("Message : "+ message);
+        MyLogger.debug("Websocket Message Received");
+        MyLogger.debug("Message : "+ message);
+        MyLogger.debug("body : "+ JSON.stringify(response.body));
         if (message === "REFRESH_DM_USER_LIST") {
             setDirectMessageRefresh(true);
         } else if (message === "REFRESH_CHANNEL_LIST") {
@@ -164,28 +166,36 @@ function WorkspacePage() {
     useEffect(() => {
         if (socketConnected) {
             if (webSocketSendMessageRequestState.sendTypingMessage === true) {
+
+                let body = {
+                    workspaceId: workspace.id,
+                    channelId: channelState.currentChannel.id,
+                    userId: user.id
+                }
+
                 ws.current.send(
                     JSON.stringify({
                         message: "MESSAGE_TYPING_START",
-                        body: {
-                            workspaceId: workspace.id,
-                            channelId: channelState.currentChannel.id,
-                            userId: user.id
-                        }
+                        body: body
                     }));
 
+                MyLogger.debug("send websocket , message : MESSAGE_TYPING_START , body:"+JSON.stringify(body));
                 webSocketSendMessageRequestState.setSendTypingMessage(false);
             } else if (webSocketSendMessageRequestState.sendTypingEndMessage === true) {
+
+                let body = {
+                    workspaceId: workspace.id,
+                    channelId: channelState.currentChannel.id,
+                    userId: user.id
+                }
+
                 ws.current.send(
                     JSON.stringify({
                         message: "MESSAGE_TYPING_END",
-                        body: {
-                            workspaceId: workspace.id,
-                            channelId: channelState.currentChannel.id,
-                            userId: user.id
-                        }
+                        body: body
                     }));
 
+                MyLogger.debug("send websocket , message : MESSAGE_TYPING_END , body:"+JSON.stringify(body));
                 webSocketSendMessageRequestState.setSendTypingEndMessage(false);
             }
         }

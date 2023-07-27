@@ -5,6 +5,7 @@ import axios from "axios";
 import {useContext, useEffect, useState} from "react";
 import {RefreshContext} from "../../../page/WorkspacePage";
 import {getUsersInWorkspace} from "../../../api/user";
+import MyLogger from "../../../util/MyLogger";
 
 
 function DirectMessageUserList(props) {
@@ -22,7 +23,7 @@ function DirectMessageUserList(props) {
     },[]);
 
     if(refreshState.directMessageRefresh) {
-        console.log("directMessageRefresh");
+        MyLogger.trace("DirectMessageRefresh");
         getUsersInWorkspace(workspaceId).then(setMembers);
         refreshState.setDirectMessageRefresh(false);
     }

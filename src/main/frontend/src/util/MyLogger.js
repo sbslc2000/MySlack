@@ -10,8 +10,14 @@ class MyLogger {
         }
     }
 
-    static info(message) {
+    static debug(message) {
         if(this.level <= 1) {
+            console.log(message);
+        }
+    }
+
+    static info(message) {
+        if(this.level <= 2) {
             console.log(message);
         }
     }

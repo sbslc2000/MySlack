@@ -29,7 +29,6 @@ function MenuItem(props) {
     const dataBsToggle = props.dataBsToggle;
     const dataBsTarget = props.dataBsTarget;
     const onClickHandler = props.onClick;
-    console.log(dataBsToggle);
 
     const tag = props.tag;
     return (

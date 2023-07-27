@@ -50,14 +50,9 @@ function WorkspaceCreatePage() {
 
     }
 
-
     const turnNext = () => {
         setProgress(progress + 1)
     }
-
-
-    console.log(workspaceCreateRequestDto);
-
 
     let content;
     if (progress === 1) {
