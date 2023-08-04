@@ -5,6 +5,7 @@ import my.slack.api.exception.ClientFaultException;
 import my.slack.domain.channel.model.Channel;
 import my.slack.domain.channel.model.ChannelCreateRequestDto;
 import my.slack.domain.channel.model.ChannelDto;
+import my.slack.domain.channel.model.ChannelMember;
 import my.slack.domain.user.UserService;
 import my.slack.domain.user.model.User;
 import my.slack.domain.workspace.MemoryWorkspaceRepository;
@@ -14,6 +15,7 @@ import my.slack.websocket.WebSocketMessageSender;
 import my.slack.websocket.model.WebSocketMessageRequest;
 import my.slack.websocket.service.ActiveUserService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +24,7 @@ import static my.slack.api.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ChannelService {
 
     private final ChannelRepository channelRepository;
@@ -29,6 +32,7 @@ public class ChannelService {
     private final WorkspaceRepository workspaceRepository;
     private final ActiveUserService activeUserService;
     private final WebSocketMessageSender webSocketMessageSender;
+    private final ChannelMemberRepository channelMemberRepository;
 
     public Long createChannel(String workspaceId, String userId, ChannelCreateRequestDto channelCreateRequestDto) {
         User creator = userService.findById(userId);
@@ -42,17 +46,14 @@ public class ChannelService {
         //}
 
 
-        //if(channelCreateRequestDto.isPrivate()) {
-        //initialMembers = channelCreateRequestDto.getInitialMembers()
-        //            .stream()
-        //            .map(userService::findById)
-        //            .collect(Collectors.toList());
-        //} else {
-        //
-        // }
-
-
         Channel channel = new Channel(workspace, creator, channelCreateRequestDto.getName(), channelCreateRequestDto.getDescription(),  channelCreateRequestDto.isPrivate());
+
+        if(channelCreateRequestDto.isPrivate()) {
+            ChannelMember channelMember = new ChannelMember(channel, creator);
+            channelMemberRepository.save(channelMember);
+            channel.addMember(channelMember);
+        }
+
         channelRepository.save(channel);
 
         //Workspace 에 채널 추가
@@ -96,7 +97,6 @@ public class ChannelService {
             throw new ClientFaultException(FORBIDDEN, "워크스페이스의 매니저만 채널을 삭제할 수 있습니다.");
         }
 
-
         //삭제
         workspace.removeChannel(channel);
 
@@ -104,17 +104,26 @@ public class ChannelService {
         channelRepository.delete(channel);
     }
 
-    public List<ChannelDto> getChannelsByWorkspaceId(String workspaceId,String userId) {
+    public List<ChannelDto> getChannelsByWorkspaceId(String workspaceId,User user) {
         Workspace workspace = workspaceRepository.findById(workspaceId)
                 .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 워크스페이스입니다."));
 
-        if(!workspace.hasUser(userId)) {
+        if(!workspace.hasUser(user.getId())) {
             throw new ClientFaultException(FORBIDDEN, "워크스페이스에 가입되지 않은 사용자입니다.");
         }
 
         return workspace.getChannels()
                 .stream()
+                .filter(channel -> channel.isPublic() || channel.hasMember(user))
                 .map(ChannelDto::of)
                 .toList();
+    }
+
+    public void changeToPublic(Long channelId) {
+        Channel channel = channelRepository.findById(channelId)
+                .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 채널입니다."));
+
+        channel.changeToPublic();
+        notifyChannelChanged(channel.getWorkspace());
     }
 }

@@ -35,6 +35,9 @@ public class Channel extends BaseTimeEntity {
     @OneToMany(mappedBy = "channel",cascade = CascadeType.REMOVE)
     private List<Message> messages = new ArrayList<>();
 
+    @OneToMany(mappedBy = "channel",cascade = CascadeType.REMOVE)
+    private List<ChannelMember> channelMembers = new ArrayList<>();
+
     private boolean isPrivate;
 
 
@@ -53,5 +56,31 @@ public class Channel extends BaseTimeEntity {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public void addMember(ChannelMember channelMember) {
+        channelMembers.add(channelMember);
+    }
+
+    public List<User> getMembers() {
+        if(isPrivate) {
+            return channelMembers.stream()
+                    .map(ChannelMember::getUser)
+                    .toList();
+        } else {
+            return workspace.getUsers();
+        }
+    }
+
+    public boolean hasMember(User user) {
+        return getMembers().contains(user);
+    }
+
+    public void changeToPublic() {
+        this.isPrivate = false;
+    }
+
+    public boolean isPublic() {
+        return !isPrivate;
     }
 }

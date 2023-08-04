@@ -30,7 +30,7 @@ public class ChannelController {
     @GetMapping
     public BaseResponse<List<ChannelDto>> getChannelsByWorkspace(@PathVariable String workspaceId,
                                                                  @LoginUser User loginUser) {
-        List<ChannelDto> channelDtos = channelService.getChannelsByWorkspaceId(workspaceId,loginUser.getId());
+        List<ChannelDto> channelDtos = channelService.getChannelsByWorkspaceId(workspaceId,loginUser);
         return new BaseResponse<>(channelDtos);
     }
 
