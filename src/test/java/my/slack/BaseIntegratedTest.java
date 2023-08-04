@@ -45,4 +45,9 @@ public class BaseIntegratedTest {
         String contentAsString = mvcResult.getResponse().getContentAsString(StandardCharsets.UTF_8);
         return objectMapper.readValue(contentAsString, BaseResponse.class);
     }
+
+    protected BaseResponse parsingMvcResult(MvcResult mvcResult) throws UnsupportedEncodingException, JsonProcessingException {
+        String contentAsString = mvcResult.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        return objectMapper.readValue(contentAsString, BaseResponse.class);
+    }
 }
