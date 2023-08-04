@@ -30,13 +30,13 @@ public class Workspace extends BaseTimeEntity {
     @JoinColumn(name = "creator_id")
     private User creator;
 
-    @OneToMany(mappedBy = "workspace")
+    @OneToMany(mappedBy = "workspace", cascade = CascadeType.REMOVE)
     private List<Manager> managers = new ArrayList<>();
 
-    @OneToMany(mappedBy = "workspace")
+    @OneToMany(mappedBy = "workspace", cascade = CascadeType.REMOVE)
     private List<Member> members = new ArrayList<>();
 
-    @OneToMany(mappedBy = "workspace")
+    @OneToMany(mappedBy = "workspace", cascade = CascadeType.REMOVE)
     private List<Channel> channels = new ArrayList<>();
 
     public boolean hasAuthority(User user) {
@@ -73,13 +73,11 @@ public class Workspace extends BaseTimeEntity {
 
     public boolean hasUser(String userId) {
         return getUsers().stream()
-                .filter(user -> user.getId().equals(userId))
-                .findFirst().isPresent();
+                .anyMatch(user -> user.getId().equals(userId));
     }
 
     public void addManager(Manager manager) {
         managers.add(manager);
-
     }
 
     public void removeChannel(Channel channel) {

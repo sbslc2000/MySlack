@@ -8,8 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 @SpringBootTest
         (
@@ -34,5 +39,10 @@ public class BaseIntegratedTest {
         Object result = response.getResult();
         String parsedString = objectMapper.writeValueAsString(result);
         return objectMapper.readValue(parsedString, clazz);
+    }
+
+    protected BaseResponse getBaseResponse(MvcResult mvcResult) throws UnsupportedEncodingException, JsonProcessingException {
+        String contentAsString = mvcResult.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        return objectMapper.readValue(contentAsString, BaseResponse.class);
     }
 }

@@ -2,6 +2,7 @@ package my.slack.domain.workspace;
 
 import lombok.RequiredArgsConstructor;
 import my.slack.api.exception.ClientFaultException;
+import my.slack.domain.channel.ChannelRepository;
 import my.slack.domain.channel.ChannelService;
 import my.slack.domain.channel.model.ChannelCreateRequestDto;
 import my.slack.domain.member.Member;
@@ -29,6 +30,7 @@ public class WorkspaceService {
     private final UserRepository userRepository;
     private final ChannelService channelService;
     private final MemberRepository memberRepository;
+    private final ChannelRepository channelRepository;
 
     public WorkspaceDto createWorkspace(String creatorId, WorkspaceCreateRequestDto workspaceCreateRequestDto) {
 

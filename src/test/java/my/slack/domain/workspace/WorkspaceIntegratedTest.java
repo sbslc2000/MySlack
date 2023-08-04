@@ -1,11 +1,13 @@
 package my.slack.domain.workspace;
 
+import aj.org.objectweb.asm.TypeReference;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import my.slack.BaseIntegratedTest;
 import my.slack.SlackApplicationTests;
 import my.slack.api.response.BaseResponse;
 import my.slack.common.login.model.LoginInfo;
+import my.slack.domain.user.model.User;
 import my.slack.domain.workspace.model.Workspace;
 import my.slack.domain.workspace.model.WorkspaceCreateRequestDto;
 import my.slack.domain.workspace.model.WorkspaceDto;
@@ -28,14 +30,16 @@ import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class WorkspaceIntegratedTest extends BaseIntegratedTest {
@@ -56,13 +60,27 @@ public class WorkspaceIntegratedTest extends BaseIntegratedTest {
 
     @Test
     @DisplayName("워크스페이스 단일 조회 테스트 : 성공")
-    void getWorkspace() throws JsonProcessingException {
+    void getWorkspace() throws Exception {
         //given
         String workspaceId = "workspace1";
         String url = "/api/workspaces/" + workspaceId;
 
         //when
         ParameterizedTypeReference<BaseResponse<WorkspaceDto>> typeRef = new ParameterizedTypeReference<>() {};
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("loginInfo", new LoginInfo("user1", LocalDateTime.now(), LocalDateTime.now()));
+        MvcResult mvcResult = mockMvc.perform(get(url).session(session)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String contentAsString = mvcResult.getResponse()
+                .getContentAsString(StandardCharsets.UTF_8);
+        BaseResponse baseResponse = objectMapper.readValue(contentAsString, BaseResponse.class);
+
+        WorkspaceDto result = extractResult(baseResponse, WorkspaceDto.class);
+
+        /*
         ResponseEntity<BaseResponse<WorkspaceDto>> response = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
@@ -70,35 +88,38 @@ public class WorkspaceIntegratedTest extends BaseIntegratedTest {
                 typeRef // 제네릭 타입 지정
         );
 
-        BaseResponse<WorkspaceDto> body = response.getBody();
+         */
+
         //then
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(body.getResult().getId()).isEqualTo(workspaceId);
+        assertThat(result.getId()).isEqualTo(workspaceId);
     }
 
     @Test
     @DisplayName("워크스페이스 단일 조회 테스트: 찾을 수 없음")
-    void getWorkspaceNotFound() {
+    void getWorkspaceNotFound() throws Exception {
         //given
         String workspaceId = "workspace100";
         String url = "/api/workspaces/" + workspaceId;
 
         //when
-        ParameterizedTypeReference<BaseResponse> typeRef = new ParameterizedTypeReference<>() {};
-        ResponseEntity<BaseResponse> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                null,
-                typeRef // 제네릭 타입 지정
-        );
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("loginInfo", new LoginInfo("user1", LocalDateTime.now(), LocalDateTime.now()));
 
-        BaseResponse body = response.getBody();
+        MvcResult mvcResult = mockMvc.perform(get(url).session(session)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+
+        String contentAsString = mvcResult.getResponse()
+                .getContentAsString(StandardCharsets.UTF_8);
+
+        BaseResponse baseResponse = objectMapper.readValue(contentAsString, BaseResponse.class);
+
         //then
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(body.isIsSuccess()).isFalse();
-        assertThat(body.getMessage()).isEqualTo("존재하지 않는 워크스페이스입니다.");
+        assertThat(baseResponse.isIsSuccess()).isFalse();
+        assertThat(baseResponse.getMessage()).isEqualTo("존재하지 않는 워크스페이스입니다.");
     }
 
     @Test
@@ -123,10 +144,8 @@ public class WorkspaceIntegratedTest extends BaseIntegratedTest {
         //then
         long after = workspaceRepository.count();
 
-        String contentAsString = mvcResult.getResponse()
-                .getContentAsString();
 
-        BaseResponse baseResponse = objectMapper.readValue(contentAsString, BaseResponse.class);
+        BaseResponse baseResponse = getBaseResponse(mvcResult);
         WorkspaceDto result = extractResult(baseResponse, WorkspaceDto.class);
 
         Workspace workspace = workspaceRepository.findById(result.getId())
@@ -160,18 +179,93 @@ public class WorkspaceIntegratedTest extends BaseIntegratedTest {
                 .andExpect(status().isBadRequest())
                 .andReturn();
 
+        BaseResponse baseResponse = getBaseResponse(mvcResult);
+
 
         //then
         long after = workspaceRepository.count();
 
-        String contentAsString = mvcResult.getResponse()
-                .getContentAsString();
-        BaseResponse baseResponse = objectMapper.readValue(contentAsString, BaseResponse.class);
-        WorkspaceDto result = extractResult(baseResponse, WorkspaceDto.class);
 
         assertThat(before).isEqualTo(after);
         assertThat(baseResponse.isIsSuccess()).isFalse();
         assertThat(baseResponse.getMessage()).isEqualTo("로그인이 필요합니다.");
+    }
+
+    @Test
+    @DisplayName("워크 스페이스 삭제: 성공")
+    void deleteWorkspace() throws Exception {
+        String url = "/api/workspaces";
+        String workspaceId = "workspace1";
+        String urlWithParam = url + "/" + workspaceId;
+
+        long before = workspaceRepository.count();
+
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("loginInfo", new LoginInfo("user1", LocalDateTime.now(), LocalDateTime.now()));
+        //when
+        MvcResult mvcResult = mockMvc.perform(delete(urlWithParam).session(session)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        BaseResponse baseResponse = getBaseResponse(mvcResult);
+
+        //then
+        long after = workspaceRepository.count();
+
+        assertThat(baseResponse.isIsSuccess()).isTrue();
+        assertThat(baseResponse.getMessage()).isEqualTo("요청에 성공하였습니다.");
+        assertThat(before-1).isEqualTo(after);
+    }
+
+    @Test
+    @DisplayName("워크 스페이스 삭제: 실패(권한 없음)")
+    void deleteWorkspaceFail() throws Exception {
+        String url = "/api/workspaces";
+        String workspaceId = "workspace1";
+        String urlWithParam = url + "/" + workspaceId;
+
+        long before = workspaceRepository.count();
+
+        MockHttpSession session = new MockHttpSession();
+
+        //when
+        MvcResult mvcResult = mockMvc.perform(delete(urlWithParam).session(session)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        BaseResponse baseResponse = getBaseResponse(mvcResult);
+
+
+        //then
+        long after = workspaceRepository.count();
+        assertThat(before).isEqualTo(after);
+        assertThat(baseResponse.isIsSuccess()).isFalse();
+        assertThat(baseResponse.getMessage()).isEqualTo("로그인이 필요합니다.");
+    }
+
+    @Test
+    @DisplayName("워크스페이스 멤버 조회: 성공")
+    void getUsersByWorkspace() throws Exception {
+        //given
+        String url = "/api/workspaces/workspace1/users";
+
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("loginInfo", new LoginInfo("user1", LocalDateTime.now(), LocalDateTime.now()));
+
+        //when
+        MvcResult mvcResult = mockMvc.perform(get(url).session(session)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        BaseResponse baseResponse = getBaseResponse(mvcResult);
+        List result = extractResult(baseResponse, List.class);
+
+        //then
+        assertThat(baseResponse.isIsSuccess()).isTrue();
+        assertThat(result.size()).isEqualTo(4);
     }
 
 }

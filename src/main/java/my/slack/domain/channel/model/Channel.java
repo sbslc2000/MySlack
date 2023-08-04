@@ -32,7 +32,7 @@ public class Channel extends BaseTimeEntity {
     @JoinColumn(name = "workspace_id")
     private Workspace workspace;
 
-    @OneToMany(mappedBy = "channel")
+    @OneToMany(mappedBy = "channel",cascade = CascadeType.REMOVE)
     private List<Message> messages = new ArrayList<>();
 
     private boolean isPrivate;
