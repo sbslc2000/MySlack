@@ -38,7 +38,7 @@ VALUES ('user2','workspace1'),
 INSERT INTO Channel (id, name, description, creator_id, workspace_id, is_private)
 VALUES
     (1, 'Channel 1', 'Description 1', 'user1', 'workspace1', false),
-    (2, 'Channel 2', 'Description 2', 'user1', 'workspace1', false),
+    (2, 'Channel 2', 'Description 2', 'user1', 'workspace1', true),
     (3, 'Channel 3', 'Description 3', 'user1', 'workspace2', false),
     (4, 'Channel 4', 'Description 4', 'user1', 'workspace2', false),
     (5, 'Channel 5', 'Description 5', 'user2', 'workspace3', false),
@@ -53,7 +53,13 @@ VALUES
     (14, 'Channel 14', 'Description 14', 'user5', 'workspace9', false),
     (15, 'Channel 15', 'Description 15', 'user5', 'workspace10', false);
 
---messages
+--channelMember
+INSERT INTO Channel_Member (user_id, channel_id)
+VALUES
+    ("user1",2),
+    ("user2",2),
+    ("user3",2);
+
 --messages
 INSERT INTO Message (id, channel_id, sender_id, content, created_at, updated_at)
 VALUES

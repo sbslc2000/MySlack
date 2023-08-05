@@ -34,15 +34,7 @@ public class WorkspaceIntegratedTest extends BaseIntegratedTest {
     @Autowired
     private WorkspaceRepository workspaceRepository;
 
-    @BeforeAll
-    public static void setup(@Autowired DataSource dataSource) {
-        try (Connection conn = dataSource.getConnection()) {
 
-            ScriptUtils.executeSqlScript(conn, new ClassPathResource("/dummyDataSet.sql"));
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
 
     @Test

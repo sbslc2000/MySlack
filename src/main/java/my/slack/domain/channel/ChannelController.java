@@ -21,10 +21,10 @@ public class ChannelController {
     private final WorkspaceService workspaceService;
 
     @PostMapping
-    public BaseResponse<String> addChannel(@PathVariable String workspaceId, @RequestBody ChannelCreateRequestDto channelCreateRequestDto,
+    public BaseResponse<ChannelDto> addChannel(@PathVariable String workspaceId, @RequestBody ChannelCreateRequestDto channelCreateRequestDto,
                                            @LoginUser User loginUser) {
-        Long createdChannelId = channelService.createChannel(workspaceId,loginUser.getId(),channelCreateRequestDto);
-        return new BaseResponse<>(createdChannelId.toString());
+        ChannelDto channelDto = channelService.createChannel(workspaceId,loginUser.getId(),channelCreateRequestDto);
+        return new BaseResponse<>(channelDto);
     }
 
     @GetMapping
@@ -39,6 +39,14 @@ public class ChannelController {
         channelService.deleteChannel(channelId,loginUser.getId());
         return new BaseResponse<>("삭제되었습니다.");
     }
+
+    @PostMapping("/{channelId}/members")
+    public BaseResponse<ChannelDto> addMember(@PathVariable Long channelId, @RequestBody List<String> userIds,
+                                              @LoginUser User loginUser) {
+        ChannelDto channelDto = channelService.addMember(channelId,userIds,loginUser.getId());
+        return new BaseResponse<>(channelDto);
+    }
+
 
 
 }

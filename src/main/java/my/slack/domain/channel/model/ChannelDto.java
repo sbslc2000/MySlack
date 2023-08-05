@@ -13,6 +13,8 @@ public class ChannelDto {
     private String description;
     private User creator;
     private List<User> members;
+
+    private boolean isPrivate;
     private LocalDateTime createdAt;
 
     public static ChannelDto of(Channel channel) {
@@ -21,6 +23,7 @@ public class ChannelDto {
         channelDto.name = channel.getName();
         channelDto.description = channel.getDescription();
         channelDto.creator = channel.getCreator();
+        channelDto.isPrivate = channel.isPrivate();
         channelDto.createdAt = channel.getCreatedAt();
         return channelDto;
     }

@@ -6,6 +6,7 @@ import my.slack.domain.channel.model.Channel;
 import my.slack.domain.channel.model.ChannelCreateRequestDto;
 import my.slack.domain.channel.model.ChannelDto;
 import my.slack.domain.channel.model.ChannelMember;
+import my.slack.domain.user.UserRepository;
 import my.slack.domain.user.UserService;
 import my.slack.domain.user.model.User;
 import my.slack.domain.workspace.MemoryWorkspaceRepository;
@@ -29,12 +30,13 @@ public class ChannelService {
 
     private final ChannelRepository channelRepository;
     private final UserService userService;
+    private final UserRepository userRepository;
     private final WorkspaceRepository workspaceRepository;
     private final ActiveUserService activeUserService;
     private final WebSocketMessageSender webSocketMessageSender;
     private final ChannelMemberRepository channelMemberRepository;
 
-    public Long createChannel(String workspaceId, String userId, ChannelCreateRequestDto channelCreateRequestDto) {
+    public ChannelDto createChannel(String workspaceId, String userId, ChannelCreateRequestDto channelCreateRequestDto) {
         User creator = userService.findById(userId);
         Workspace workspace = workspaceRepository.findById(workspaceId)
                 .orElseThrow(
@@ -49,9 +51,7 @@ public class ChannelService {
         Channel channel = new Channel(workspace, creator, channelCreateRequestDto.getName(), channelCreateRequestDto.getDescription(),  channelCreateRequestDto.isPrivate());
 
         if(channelCreateRequestDto.isPrivate()) {
-            ChannelMember channelMember = new ChannelMember(channel, creator);
-            channelMemberRepository.save(channelMember);
-            channel.addMember(channelMember);
+           addMemberToChannel(channel, creator);
         }
 
         channelRepository.save(channel);
@@ -60,7 +60,7 @@ public class ChannelService {
         workspace.addChannel(channel);
 
         notifyChannelChanged(workspace);
-        return channel.getId();
+        return ChannelDto.of(channel);
     }
 
     private void notifyChannelChanged(Workspace workspace) {
@@ -125,5 +125,32 @@ public class ChannelService {
 
         channel.changeToPublic();
         notifyChannelChanged(channel.getWorkspace());
+    }
+
+    public void addMembers()
+
+    public void addMember(Long channelId, List<String> userIds) {
+        Channel channel = channelRepository.findById(channelId)
+                .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 채널입니다."));
+
+        for(String userId : userIds) {
+            addMemberToChannel(channel, userId);
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 사용자입니다."));
+
+        addMemberToChannel(channel, user);
+    }
+
+    private void addMemberToChannel(Channel channel, User user) {
+        //이미 등록되어있다면?
+        if(channel.hasMember(user)) {
+            throw new ClientFaultException(INVALID_REQUEST, "이미 채널에 등록되어있습니다.");
+        }
+
+        ChannelMember channelMember = new ChannelMember(channel, user);
+        channelMemberRepository.save(channelMember);
+
+        channel.addMember(channelMember);
     }
 }
