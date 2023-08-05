@@ -16,10 +16,10 @@ public class Manager extends BaseTimeEntity {
     Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id",nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "workspace_id",nullable = false)
+    @JoinColumn(name = "workspace_id", nullable = false)
     private Workspace workspace;
 }

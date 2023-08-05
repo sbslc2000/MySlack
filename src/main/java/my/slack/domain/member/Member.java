@@ -1,7 +1,6 @@
 package my.slack.domain.member;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import my.slack.common.model.BaseTimeEntity;
@@ -18,11 +17,11 @@ public class Member extends BaseTimeEntity {
     Long id;
 
     @ManyToOne
-    @JoinColumn(name = "workspace_id",nullable = false)
+    @JoinColumn(name = "workspace_id", nullable = false)
     private Workspace workspace;
 
     @ManyToOne
-    @JoinColumn(name = "user_id",nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     public Member(Workspace workspace, User user) {

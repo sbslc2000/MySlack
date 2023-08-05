@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MemoryMessageRepository {
 
     private Long sequence = 1L;
-    private Map<Long, Message> repository = new ConcurrentHashMap<>();
+    private final Map<Long, Message> repository = new ConcurrentHashMap<>();
 
     public Long save(Message message) {
         message.setId(sequence++);

@@ -4,15 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import my.slack.api.response.BaseResponse;
 import my.slack.common.login.LoginUser;
-import my.slack.domain.channel.model.ChannelDto;
 import my.slack.domain.user.model.User;
-import my.slack.domain.workspace.model.Workspace;
 import my.slack.domain.workspace.model.WorkspaceCreateRequestDto;
 import my.slack.domain.workspace.model.WorkspaceDto;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -35,7 +32,7 @@ public class WorkspaceController {
     }
 
     @GetMapping("/{workspaceId}/users")
-    public BaseResponse<List<User>> getMembersByWorkspace(@PathVariable String workspaceId,@LoginUser User loginUser) {
+    public BaseResponse<List<User>> getMembersByWorkspace(@PathVariable String workspaceId, @LoginUser User loginUser) {
         return new BaseResponse<>(workspaceService.getUsersByWorkspace(workspaceId, loginUser.getId()));
     }
 

@@ -1,7 +1,6 @@
 package my.slack.domain.channel.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import my.slack.domain.user.model.User;

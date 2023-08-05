@@ -32,16 +32,16 @@ public class Channel extends BaseTimeEntity {
     @JoinColumn(name = "workspace_id")
     private Workspace workspace;
 
-    @OneToMany(mappedBy = "channel",cascade = CascadeType.REMOVE)
-    private List<Message> messages = new ArrayList<>();
+    @OneToMany(mappedBy = "channel", cascade = CascadeType.REMOVE)
+    private final List<Message> messages = new ArrayList<>();
 
-    @OneToMany(mappedBy = "channel",cascade = CascadeType.REMOVE)
-    private List<ChannelMember> channelMembers = new ArrayList<>();
+    @OneToMany(mappedBy = "channel", cascade = CascadeType.REMOVE)
+    private final List<ChannelMember> channelMembers = new ArrayList<>();
 
     private boolean isPrivate;
 
 
-    public Channel(Workspace workspace,User creator,String name,String description, boolean isPrivate) {
+    public Channel(Workspace workspace, User creator, String name, String description, boolean isPrivate) {
         this.workspace = workspace;
         this.creator = creator;
         this.name = name;
@@ -64,7 +64,7 @@ public class Channel extends BaseTimeEntity {
     }
 
     public List<User> getMembers() {
-        if(isPrivate) {
+        if (isPrivate) {
             return channelMembers.stream()
                     .map(ChannelMember::getUser)
                     .toList();

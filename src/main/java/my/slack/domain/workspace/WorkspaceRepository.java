@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface WorkspaceRepository extends JpaRepository<Workspace,String> {
+public interface WorkspaceRepository extends JpaRepository<Workspace, String> {
 
     @Query("SELECT w FROM Workspace w " +
             "WHERE w.creator = :user " +

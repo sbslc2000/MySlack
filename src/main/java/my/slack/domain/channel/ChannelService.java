@@ -9,7 +9,6 @@ import my.slack.domain.channel.model.ChannelMember;
 import my.slack.domain.user.UserRepository;
 import my.slack.domain.user.UserService;
 import my.slack.domain.user.model.User;
-import my.slack.domain.workspace.MemoryWorkspaceRepository;
 import my.slack.domain.workspace.WorkspaceRepository;
 import my.slack.domain.workspace.model.Workspace;
 import my.slack.websocket.WebSocketMessageSender;
@@ -48,10 +47,10 @@ public class ChannelService {
         //}
 
 
-        Channel channel = new Channel(workspace, creator, channelCreateRequestDto.getName(), channelCreateRequestDto.getDescription(),  channelCreateRequestDto.isPrivate());
+        Channel channel = new Channel(workspace, creator, channelCreateRequestDto.getName(), channelCreateRequestDto.getDescription(), channelCreateRequestDto.isPrivate());
 
-        if(channelCreateRequestDto.isPrivate()) {
-           addMemberToChannel(channel, creator);
+        if (channelCreateRequestDto.isPrivate()) {
+            addMemberToChannel(channel, creator);
         }
 
         channelRepository.save(channel);
@@ -69,13 +68,13 @@ public class ChannelService {
         List<User> activeUsers = activeUserService.getActiveUsers();
 
         activeUsers.forEach((user) -> {
-            if(workspace.hasUser(user.getId())) {
+            if (workspace.hasUser(user.getId())) {
                 targetUsers.add(user);
             }
         });
 
 
-        WebSocketMessageRequest req = new WebSocketMessageRequest("REFRESH_CHANNEL_LIST",null,targetUsers);
+        WebSocketMessageRequest req = new WebSocketMessageRequest("REFRESH_CHANNEL_LIST", null, targetUsers);
         webSocketMessageSender.sendMessage(req);
     }
 
@@ -93,7 +92,8 @@ public class ChannelService {
 
         Workspace workspace = channel.getWorkspace();
 
-        if(!workspace.getManagers().contains(deleter)) {
+        if (!workspace.getManagers()
+                .contains(deleter)) {
             throw new ClientFaultException(FORBIDDEN, "워크스페이스의 매니저만 채널을 삭제할 수 있습니다.");
         }
 
@@ -104,11 +104,11 @@ public class ChannelService {
         channelRepository.delete(channel);
     }
 
-    public List<ChannelDto> getChannelsByWorkspaceId(String workspaceId,User user) {
+    public List<ChannelDto> getChannelsByWorkspaceId(String workspaceId, User user) {
         Workspace workspace = workspaceRepository.findById(workspaceId)
                 .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 워크스페이스입니다."));
 
-        if(!workspace.hasUser(user.getId())) {
+        if (!workspace.hasUser(user.getId())) {
             throw new ClientFaultException(FORBIDDEN, "워크스페이스에 가입되지 않은 사용자입니다.");
         }
 
@@ -127,24 +127,31 @@ public class ChannelService {
         notifyChannelChanged(channel.getWorkspace());
     }
 
-    public void addMembers()
-
-    public void addMember(Long channelId, List<String> userIds) {
+    public void addMembers(Long channelId, List<String> userIds, User loginUser) {
         Channel channel = channelRepository.findById(channelId)
                 .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 채널입니다."));
 
-        for(String userId : userIds) {
-            addMemberToChannel(channel, userId);
+        if (!channel.hasMember(loginUser) && !channel.getWorkspace()
+                .hasAuthority(loginUser)) {
+            throw new ClientFaultException(FORBIDDEN, "채널의 사용자를 추가할 권한이 없습니다.");
         }
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 사용자입니다."));
 
-        addMemberToChannel(channel, user);
+        for (String userId : userIds) {
+            if (!channel.getWorkspace()
+                    .hasUser(userId)) {
+                throw new ClientFaultException(ENTITY_NOT_FOUND, "사용자가 워크스페이스에 참여하고 있지 않습니다.");
+            }
+
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 사용자입니다."));
+
+            addMemberToChannel(channel, user);
+        }
     }
 
     private void addMemberToChannel(Channel channel, User user) {
         //이미 등록되어있다면?
-        if(channel.hasMember(user)) {
+        if (channel.hasMember(user)) {
             throw new ClientFaultException(INVALID_REQUEST, "이미 채널에 등록되어있습니다.");
         }
 

@@ -10,7 +10,6 @@ import my.slack.domain.workspace.WorkspaceService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,31 +21,30 @@ public class ChannelController {
 
     @PostMapping
     public BaseResponse<ChannelDto> addChannel(@PathVariable String workspaceId, @RequestBody ChannelCreateRequestDto channelCreateRequestDto,
-                                           @LoginUser User loginUser) {
-        ChannelDto channelDto = channelService.createChannel(workspaceId,loginUser.getId(),channelCreateRequestDto);
+                                               @LoginUser User loginUser) {
+        ChannelDto channelDto = channelService.createChannel(workspaceId, loginUser.getId(), channelCreateRequestDto);
         return new BaseResponse<>(channelDto);
     }
 
     @GetMapping
     public BaseResponse<List<ChannelDto>> getChannelsByWorkspace(@PathVariable String workspaceId,
                                                                  @LoginUser User loginUser) {
-        List<ChannelDto> channelDtos = channelService.getChannelsByWorkspaceId(workspaceId,loginUser);
+        List<ChannelDto> channelDtos = channelService.getChannelsByWorkspaceId(workspaceId, loginUser);
         return new BaseResponse<>(channelDtos);
     }
 
     @DeleteMapping("/{channelId}")
     public BaseResponse<String> deleteChannel(@PathVariable Long channelId, @LoginUser User loginUser) {
-        channelService.deleteChannel(channelId,loginUser.getId());
+        channelService.deleteChannel(channelId, loginUser.getId());
         return new BaseResponse<>("삭제되었습니다.");
     }
 
     @PostMapping("/{channelId}/members")
-    public BaseResponse<ChannelDto> addMember(@PathVariable Long channelId, @RequestBody List<String> userIds,
+    public BaseResponse<String> addMember(@PathVariable Long channelId, @RequestBody List<String> userIds,
                                               @LoginUser User loginUser) {
-        ChannelDto channelDto = channelService.addMember(channelId,userIds,loginUser.getId());
-        return new BaseResponse<>(channelDto);
+        channelService.addMembers(channelId, userIds, loginUser);
+        return new BaseResponse<>("추가되었습니다.");
     }
-
 
 
 }

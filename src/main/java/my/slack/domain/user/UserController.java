@@ -8,12 +8,14 @@ import my.slack.common.login.LoginUser;
 import my.slack.domain.user.model.User;
 import my.slack.domain.workspace.WorkspaceService;
 import my.slack.domain.workspace.model.WorkspaceDto;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static my.slack.api.ErrorCode.*;
+import static my.slack.api.ErrorCode.FORBIDDEN;
 
 @Slf4j
 @RestController
@@ -27,8 +29,8 @@ public class UserController {
     @GetMapping("/{userId}/workspaces")
     public BaseResponse<List<WorkspaceDto>> getUserWorkspaces(@PathVariable String userId, @LoginUser User loginUser) {
 
-        if(!userId.equals(loginUser.getId()))
-            throw new ClientFaultException(FORBIDDEN,"다른 유저의 워크스페이스를 조회할 수 없습니다.");
+        if (!userId.equals(loginUser.getId()))
+            throw new ClientFaultException(FORBIDDEN, "다른 유저의 워크스페이스를 조회할 수 없습니다.");
 
         return new BaseResponse<>(workspaceService.getUserWorkspaces(userId));
     }
@@ -37,7 +39,7 @@ public class UserController {
     public BaseResponse<List<WorkspaceDto>> getUserWorkspacesBySession(@LoginUser User loginUser) {
 
         List<WorkspaceDto> userWorkspaces = workspaceService.getUserWorkspaces(loginUser.getId());
-        log.info("userWorkspaces = {}",userWorkspaces);
+        log.info("userWorkspaces = {}", userWorkspaces);
 
         return new BaseResponse<>(userWorkspaces);
     }
@@ -47,8 +49,6 @@ public class UserController {
         User user = userService.findById(loginUser.getId());
         return new BaseResponse<>(user);
     }
-
-
 
 
 }

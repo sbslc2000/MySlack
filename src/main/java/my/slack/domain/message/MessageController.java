@@ -21,7 +21,6 @@ public class MessageController {
 
 
     /**
-     *
      * @param channelId
      * @return
      */
@@ -34,7 +33,7 @@ public class MessageController {
     public BaseResponse<String> sendMessage(@RequestBody MessageCreateRequestDto messageCreateRequestDto,
                                             @LoginUser User loginUser) {
         log.info("message create request");
-        messageService.addMessage(loginUser.getId(),messageCreateRequestDto);
+        messageService.addMessage(loginUser.getId(), messageCreateRequestDto);
         return new BaseResponse<>("메시지를 보냈습니다.");
     }
 

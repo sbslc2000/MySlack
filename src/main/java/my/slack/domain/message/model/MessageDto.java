@@ -14,6 +14,6 @@ public class MessageDto {
     private LocalDateTime createdAt;
 
     public static MessageDto of(Message message) {
-        return new MessageDto(message.getSender(),message.getContent(),message.getCreatedAt());
+        return new MessageDto(message.getSender(), message.getContent(), message.getCreatedAt());
     }
 }

@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-import static my.slack.api.ErrorCode.*;
+import static my.slack.api.ErrorCode.ENTITY_NOT_FOUND;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -26,7 +26,7 @@ public class UserService {
 
     public User findById(String id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND,"해당 유저가 없습니다."));
+                .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "해당 유저가 없습니다."));
         return user;
     }
 

@@ -8,9 +8,7 @@ import my.slack.domain.channel.model.Channel;
 import my.slack.domain.member.Manager;
 import my.slack.domain.member.Member;
 import my.slack.domain.user.model.User;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -31,23 +29,23 @@ public class Workspace extends BaseTimeEntity {
     private User creator;
 
     @OneToMany(mappedBy = "workspace", cascade = CascadeType.REMOVE)
-    private List<Manager> managers = new ArrayList<>();
+    private final List<Manager> managers = new ArrayList<>();
 
     @OneToMany(mappedBy = "workspace", cascade = CascadeType.REMOVE)
-    private List<Member> members = new ArrayList<>();
+    private final List<Member> members = new ArrayList<>();
 
     @OneToMany(mappedBy = "workspace", cascade = CascadeType.REMOVE)
-    private List<Channel> channels = new ArrayList<>();
+    private final List<Channel> channels = new ArrayList<>();
+
+    public Workspace(User creator, String name) {
+        this.id = UUID.randomUUID()
+                .toString();
+        this.name = name;
+        this.creator = creator;
+    }
 
     public boolean hasAuthority(User user) {
         return user.equals(creator) || managers.contains(user);
-    }
-
-
-    public Workspace(User creator, String name) {
-        this.id = UUID.randomUUID().toString();
-        this.name = name;
-        this.creator = creator;
     }
 
     public void setId(String id) {
@@ -60,7 +58,10 @@ public class Workspace extends BaseTimeEntity {
     }
 
     public List<User> getUsers() {
-        List<User> users = Stream.concat(managers.stream().map(Manager::getUser), members.stream().map(Member::getUser)).distinct()
+        List<User> users = Stream.concat(managers.stream()
+                        .map(Manager::getUser), members.stream()
+                        .map(Member::getUser))
+                .distinct()
                 .collect(Collectors.toList());
         users.add(creator);
         return users;
@@ -73,7 +74,8 @@ public class Workspace extends BaseTimeEntity {
 
     public boolean hasUser(String userId) {
         return getUsers().stream()
-                .anyMatch(user -> user.getId().equals(userId));
+                .anyMatch(user -> user.getId()
+                        .equals(userId));
     }
 
     public void addManager(Manager manager) {
