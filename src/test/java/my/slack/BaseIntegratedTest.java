@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import my.slack.api.response.BaseResponse;
 import my.slack.common.login.model.LoginInfo;
+import my.slack.domain.channel.ChannelMemberRepository;
 import my.slack.domain.channel.ChannelRepository;
 import my.slack.domain.workspace.WorkspaceRepository;
 import org.junit.jupiter.api.BeforeAll;
@@ -52,6 +53,7 @@ public class BaseIntegratedTest {
     @Autowired protected ObjectMapper objectMapper;
     @Autowired protected WorkspaceRepository workspaceRepository;
     @Autowired protected ChannelRepository channelRepository;
+    @Autowired protected ChannelMemberRepository channelMemberRepository;
 
     protected <T> T extractResult(BaseResponse response, Class<T> clazz) throws JsonProcessingException {
         Object result = response.getResult();

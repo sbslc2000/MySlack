@@ -2,6 +2,8 @@ package my.slack.domain.workspace;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import my.slack.api.ErrorCode;
+import my.slack.api.exception.ClientFaultException;
 import my.slack.api.response.BaseResponse;
 import my.slack.common.login.LoginUser;
 import my.slack.domain.user.model.User;
@@ -32,8 +34,11 @@ public class WorkspaceController {
     }
 
     @GetMapping("/{workspaceId}/users")
-    public BaseResponse<List<User>> getMembersByWorkspace(@PathVariable String workspaceId, @LoginUser User loginUser) {
-        return new BaseResponse<>(workspaceService.getUsersByWorkspace(workspaceId, loginUser.getId()));
+    public BaseResponse<List<User>> getMembersByWorkspace(@PathVariable String workspaceId,
+                                                          @LoginUser User loginUser,
+                                                          @RequestParam(defaultValue = "") String search) {
+
+        return new BaseResponse<>(workspaceService.getUsersByWorkspace(workspaceId, search, loginUser));
     }
 
     @PostMapping

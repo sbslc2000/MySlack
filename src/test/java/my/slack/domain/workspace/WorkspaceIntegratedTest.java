@@ -4,6 +4,7 @@ package my.slack.domain.workspace;
 import my.slack.BaseIntegratedTest;
 import my.slack.api.response.BaseResponse;
 import my.slack.common.login.model.LoginInfo;
+import my.slack.domain.user.model.User;
 import my.slack.domain.workspace.model.Workspace;
 import my.slack.domain.workspace.model.WorkspaceCreateRequestDto;
 import my.slack.domain.workspace.model.WorkspaceDto;
@@ -225,7 +226,7 @@ public class WorkspaceIntegratedTest extends BaseIntegratedTest {
     }
 
     @Test
-    @DisplayName("워크스페이스 멤버 조회: 성공")
+    @DisplayName("워크스페이스 멤버 조회: 전체")
     void getUsersByWorkspace() throws Exception {
         //given
         String url = "/api/workspaces/workspace1/users";
@@ -245,6 +246,37 @@ public class WorkspaceIntegratedTest extends BaseIntegratedTest {
         //then
         assertThat(baseResponse.isIsSuccess()).isTrue();
         assertThat(result.size()).isEqualTo(4);
+    }
+
+    @Test
+    @DisplayName("워크스페이스 멤버 조회: 검색")
+    void searchWorkspaceUsers() throws Exception {
+
+        String workspaceId = "workspace1";
+        String url = "/api/workspaces/"+workspaceId+"/users";
+        String search = "er 2";
+        String urlWithParam = url + "?search=" + search;
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("loginInfo",getLoginInfo("user1"));
+
+        //when
+        MvcResult mvcResult = mockMvc.perform(get(urlWithParam).session(session)
+                        .session(session)
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        BaseResponse baseResponse = getBaseResponse(mvcResult);
+        List result = extractResult(baseResponse, List.class);
+
+        //then
+
+        String parsedString = objectMapper.writeValueAsString(result.get(0));
+        User user = objectMapper.readValue(parsedString, User.class);
+        assertThat(baseResponse.isIsSuccess()).isTrue();
+        assertThat(result.size()).isEqualTo(1);
+        assertThat(user.getNickname()).isEqualTo("User 2");
     }
 
 }

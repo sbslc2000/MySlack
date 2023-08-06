@@ -22,7 +22,7 @@ public class LoginController {
 
     @PostMapping("/logout")
     public String logout(HttpSession session) {
-        session.removeAttribute("userId");
+        session.removeAttribute("loginInfo");
         return "redirect:/";
     }
 

@@ -1,7 +1,9 @@
 package my.slack.domain.workspace;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import my.slack.api.exception.ClientFaultException;
+import my.slack.common.login.LoginUser;
 import my.slack.domain.channel.ChannelRepository;
 import my.slack.domain.channel.ChannelService;
 import my.slack.domain.channel.model.ChannelCreateRequestDto;
@@ -21,6 +23,7 @@ import java.util.List;
 import static my.slack.api.ErrorCode.ENTITY_NOT_FOUND;
 import static my.slack.api.ErrorCode.FORBIDDEN;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -124,24 +127,46 @@ public class WorkspaceService {
         memberRepository.save(member);
     }
 
-    public List<User> getUsersByWorkspace(String workspaceId, String userId) {
+    public List<User> getUsersByWorkspace(String workspaceId, String search, User loginUser) {
 
         Workspace workspace = workspaceRepository.findById(workspaceId)
                 .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 워크스페이스입니다."));
 
-        if (!workspace.hasUser(userId)) {
+        if (!workspace.hasUser(loginUser.getId())) {
             throw new ClientFaultException(FORBIDDEN, "워크스페이스에 가입되지 않은 사용자입니다.");
         } else {
-            List<User> users = workspace.getUsers();
 
-            users.sort(Comparator.comparing(user -> user.getId()
-                    .equals(userId) ? 0 : 1));
+            List<User> users = workspace.getUsers()
+                    .stream()
+                    .filter(user -> user.getNickname()
+                            .contains(search))
+                    .sorted(Comparator.comparing(user -> user.getId()
+                            .equals(loginUser.getId()) ? 0 : 1))
+                    .toList();
+
+            log.debug("users: {}", users);
+
             return users;
         }
     }
 
     public String createInviteLink(String workspaceId) {
         return "/workspaces/enter/" + workspaceId;
+    }
+
+    public List<User> searchWorkspaceUsers(String workspaceId, String searchName, @LoginUser User loginUser) {
+        Workspace workspace = workspaceRepository.findById(workspaceId)
+                .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 워크스페이스입니다."));
+
+        if (!workspace.hasUser(loginUser.getId())) {
+            throw new ClientFaultException(FORBIDDEN, "워크스페이스에 가입되지 않은 사용자입니다.");
+        }
+
+        return workspace.getUsers()
+                .stream()
+                .filter(user -> user.getNickname()
+                        .contains(searchName))
+                .toList();
     }
 
 

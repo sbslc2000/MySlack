@@ -5,6 +5,7 @@ import my.slack.api.response.BaseResponse;
 import my.slack.common.login.LoginUser;
 import my.slack.domain.channel.model.ChannelCreateRequestDto;
 import my.slack.domain.channel.model.ChannelDto;
+import my.slack.domain.channel.model.ChannelMemberCreateRequestDto;
 import my.slack.domain.user.model.User;
 import my.slack.domain.workspace.WorkspaceService;
 import org.springframework.web.bind.annotation.*;
@@ -39,12 +40,22 @@ public class ChannelController {
         return new BaseResponse<>("삭제되었습니다.");
     }
 
-    @PostMapping("/{channelId}/members")
-    public BaseResponse<String> addMember(@PathVariable Long channelId, @RequestBody List<String> userIds,
-                                              @LoginUser User loginUser) {
-        channelService.addMembers(channelId, userIds, loginUser);
-        return new BaseResponse<>("추가되었습니다.");
+    @GetMapping("/{channelId}/members")
+    public BaseResponse<List<User>> getMembers(@PathVariable Long channelId,
+                                               @RequestParam(defaultValue = "") String searchName,
+                                               @LoginUser User loginUser) {
+        List<User> members = channelService.findMembers(channelId, searchName, loginUser);
+        return new BaseResponse<>(members);
     }
+
+    @PostMapping("/{channelId}/members")
+    public BaseResponse<List<User>> addMember(@PathVariable Long channelId, @RequestBody ChannelMemberCreateRequestDto channelMemberCreateRequestDto,
+                                              @LoginUser User loginUser) {
+        List<User> members = channelService.addMembers(channelId, channelMemberCreateRequestDto, loginUser);
+        return new BaseResponse<>(members);
+    }
+
+
 
 
 }

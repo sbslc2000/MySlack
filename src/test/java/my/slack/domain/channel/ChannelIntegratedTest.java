@@ -5,8 +5,10 @@ import my.slack.BaseIntegratedTest;
 import my.slack.api.response.BaseResponse;
 import my.slack.common.login.model.LoginInfo;
 import my.slack.domain.channel.ChannelService;
+import my.slack.domain.channel.model.Channel;
 import my.slack.domain.channel.model.ChannelCreateRequestDto;
 import my.slack.domain.channel.model.ChannelDto;
+import my.slack.domain.channel.model.ChannelMemberCreateRequestDto;
 import my.slack.domain.workspace.model.Workspace;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -111,9 +113,44 @@ public class ChannelIntegratedTest extends BaseIntegratedTest {
     }
 
     @Test
-    @DisplayName("채널 멤버 추가")
+    @DisplayName("채널 멤버 추가: 성공")
     void addChannelMember() throws Exception {
+        //given
+        String workspaceId = "workspace1";
+        Long channelId = 2L;
 
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("loginInfo",getLoginInfo("user2"));
+
+        ChannelMemberCreateRequestDto dto = new ChannelMemberCreateRequestDto("user4");
+        String requestBody = objectMapper.writeValueAsString(dto);
+
+        Channel channel = channelRepository.findById(channelId).get();
+        int beforeChannelMemberSize = channel.getMembers().size();
+
+        long beforeChannelMemberCount = channelMemberRepository.count();
+
+        //when
+        MvcResult mvcResult = mockMvc.perform(post("/api/workspaces/" + workspaceId + "/channels/" + channelId + "/members")
+                        .session(session)
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+
+        //then
+        BaseResponse baseResponse = getBaseResponse(mvcResult);
+        List result = extractResult(baseResponse, List.class);
+
+        Channel afterChannel = channelRepository.findById(channelId).get();
+        int afterChannelMemberSize = afterChannel.getMembers().size();
+
+        long afterChannelMemberCount = channelMemberRepository.count();
+
+        assertThat(result.size()).isEqualTo(4);
+        assertThat(afterChannelMemberSize).isEqualTo(beforeChannelMemberSize + 1);
+        assertThat(afterChannelMemberCount).isEqualTo(beforeChannelMemberCount + 1);
     }
 
 }

@@ -28,10 +28,10 @@ public class Workspace extends BaseTimeEntity {
     @JoinColumn(name = "creator_id")
     private User creator;
 
-    @OneToMany(mappedBy = "workspace", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "workspace", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private final List<Manager> managers = new ArrayList<>();
 
-    @OneToMany(mappedBy = "workspace", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "workspace", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private final List<Member> members = new ArrayList<>();
 
     @OneToMany(mappedBy = "workspace", cascade = CascadeType.REMOVE)

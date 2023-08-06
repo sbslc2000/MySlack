@@ -60,7 +60,6 @@ public class Channel extends BaseTimeEntity {
 
     public void addMember(ChannelMember channelMember) {
         channelMembers.add(channelMember);
-
     }
 
     public List<User> getMembers() {
