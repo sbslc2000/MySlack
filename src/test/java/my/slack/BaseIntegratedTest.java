@@ -7,13 +7,13 @@ import my.slack.common.login.model.LoginInfo;
 import my.slack.domain.channel.ChannelMemberRepository;
 import my.slack.domain.channel.ChannelRepository;
 import my.slack.domain.workspace.WorkspaceRepository;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.test.web.servlet.MockMvc;
@@ -44,6 +44,15 @@ public class BaseIntegratedTest {
         try (Connection conn = dataSource.getConnection()) {
 
             ScriptUtils.executeSqlScript(conn, new ClassPathResource("/dummyDataSet.sql"));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @AfterAll
+    public static void tearDown(@Autowired DataSource dataSource) {
+        try (Connection conn = dataSource.getConnection()) {
+            ScriptUtils.executeSqlScript(conn, new ClassPathResource("/truncateAll.sql"));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
