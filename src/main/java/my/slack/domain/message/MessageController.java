@@ -25,8 +25,8 @@ public class MessageController {
      * @return
      */
     @GetMapping
-    public BaseResponse<List<MessageDto>> getMessages(@RequestParam Long channelId) {
-        return new BaseResponse<>(messageService.getMessagesByChannel(channelId));
+    public BaseResponse<List<MessageDto>> getMessages(@RequestParam Long channelId,@LoginUser User loginUser) {
+        return new BaseResponse<>(messageService.getMessagesByChannel(channelId,loginUser));
     }
 
     @PostMapping

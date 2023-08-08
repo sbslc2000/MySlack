@@ -5,12 +5,14 @@ import lombok.RequiredArgsConstructor;
 import my.slack.api.ErrorCode;
 import my.slack.api.exception.ClientFaultException;
 import my.slack.domain.channel.ChannelRepository;
+import my.slack.domain.channel.exception.ChannelNotFound;
 import my.slack.domain.channel.model.Channel;
 import my.slack.domain.message.model.Message;
 import my.slack.domain.message.model.MessageCreateRequestDto;
 import my.slack.domain.message.model.MessageDto;
 import my.slack.domain.message.model.MessageNotifyDto;
 import my.slack.domain.user.UserRepository;
+import my.slack.domain.user.exception.UserNotFound;
 import my.slack.domain.user.model.User;
 import my.slack.domain.workspace.WorkspaceRepository;
 import my.slack.domain.workspace.model.Workspace;
@@ -42,25 +44,20 @@ public class MessageService {
      */
     public MessageDto addMessage(String userId, MessageCreateRequestDto messageCreateRequestDto) {
 
-
-        Channel channel = channelRepository.findById(messageCreateRequestDto.getChannelId())
-                .orElseThrow(() -> new ClientFaultException(ErrorCode.ENTITY_NOT_FOUND, "존재하지 않는 채널입니다."));
+        Channel channel = findChannel(messageCreateRequestDto.getChannelId());
 
         Workspace workspace = channel.getWorkspace();
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ClientFaultException(ErrorCode.ENTITY_NOT_FOUND, "존재하지 않는 사용자입니다."));
+        User user = findUser(userId);
 
-        if (!workspace.hasUser(user.getId())) {
-            throw new ClientFaultException(ErrorCode.FORBIDDEN, "메시지를 보낼 수 있는 사용자가 아닙니다.");
+        if (!workspace.hasUser(user)) {
+            throw new ClientFaultException(ErrorCode.PERMISSION_DENIED, "메시지를 보낼 수 있는 사용자가 아닙니다.");
         }
 
         Message message = new Message(user, channel, messageCreateRequestDto.getContent());
         Message createdMessage = messageRepository.save(message);
 
         //channel.addMessage(message);
-
-
         notifyMessageCreated(workspace, channel.getId());
 
         return MessageDto.of(createdMessage);
@@ -82,14 +79,35 @@ public class MessageService {
         webSocketMessageSender.sendMessage(req);
     }
 
-    public List<MessageDto> getMessagesByChannel(Long channelId) {
-        Channel channel = channelRepository.findById(channelId)
-                .orElseThrow(
-                        () -> new ClientFaultException(ErrorCode.ENTITY_NOT_FOUND, "존재하지 않는 채널입니다."));
-        return channel.getMessages()
-                .stream()
-                .map(MessageDto::of)
-                .toList();
+    public List<MessageDto> getMessagesByChannel(Long channelId, User loginUser) {
+
+        Channel channel = findChannel(channelId);
+
+        if(hasMessageViewAuthority(channel,loginUser)) {
+            return channel.getMessages()
+                    .stream()
+                    .map(MessageDto::of)
+                    .toList();
+        } else {
+            throw new ClientFaultException(ErrorCode.PERMISSION_DENIED, "메시지를 볼 수 있는 사용자가 아닙니다.");
+        }
+    }
+
+    //loginUser가 workspace에 속해있으면서 channel 이 public이거나, private이면서 채널에 멤버로 포함되어있다면
+    private boolean hasMessageViewAuthority(Channel channel, User loginUser) {
+        return channel.isPublic() && channel.getWorkspace().hasUser(loginUser) ||
+        channel.isPrivate() && channel.hasMember(loginUser);
+    }
+
+    //private method
+    private User findUser(String userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(UserNotFound::new);
+    }
+
+    private Channel findChannel(Long channelId) {
+        return channelRepository.findById(channelId)
+                .orElseThrow(ChannelNotFound::new);
     }
 
 }

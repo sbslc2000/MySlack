@@ -2,11 +2,14 @@ package my.slack.domain.channel;
 
 import lombok.RequiredArgsConstructor;
 import my.slack.api.exception.ClientFaultException;
+import my.slack.domain.channel.exception.ChannelNotFound;
 import my.slack.domain.channel.model.*;
 import my.slack.domain.user.UserRepository;
 import my.slack.domain.user.UserService;
+import my.slack.domain.user.exception.UserNotFound;
 import my.slack.domain.user.model.User;
 import my.slack.domain.workspace.WorkspaceRepository;
+import my.slack.domain.workspace.exception.WorkspaceNotFound;
 import my.slack.domain.workspace.model.Workspace;
 import my.slack.websocket.WebSocketMessageSender;
 import my.slack.websocket.model.WebSocketMessageRequest;
@@ -32,11 +35,9 @@ public class ChannelService {
     private final WebSocketMessageSender webSocketMessageSender;
     private final ChannelMemberRepository channelMemberRepository;
 
-    public ChannelDto createChannel(String workspaceId, String userId, ChannelCreateRequestDto channelCreateRequestDto) {
-        User creator = userService.findById(userId);
-        Workspace workspace = workspaceRepository.findById(workspaceId)
-                .orElseThrow(
-                        () -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 워크스페이스입니다."));
+    public ChannelDto createChannel(String workspaceId, User loginUser, ChannelCreateRequestDto channelCreateRequestDto) {
+        User creator = loginUser;
+        Workspace workspace = findWorkspace(workspaceId);
 
         //channel의 creator 가 workspace의 manager인가?
         //if(!workspace.hasAuthority(creator)) {
@@ -45,12 +46,11 @@ public class ChannelService {
 
 
         Channel channel = new Channel(workspace, creator, channelCreateRequestDto.getName(), channelCreateRequestDto.getDescription(), channelCreateRequestDto.isPrivate());
+        channelRepository.save(channel);
 
         if (channelCreateRequestDto.isPrivate()) {
             addMemberToChannel(channel, creator);
         }
-
-        channelRepository.save(channel);
 
         //Workspace 에 채널 추가
         workspace.addChannel(channel);
@@ -75,23 +75,12 @@ public class ChannelService {
         webSocketMessageSender.sendMessage(req);
     }
 
-    public void deleteChannel(Long channelId, String deleterId) {
-        User deleter = userService.findById(deleterId);
-
-        Channel channel = channelRepository.findById(channelId)
-                .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 채널입니다."));
-
-        /*
-        Workspace workspace = workspaceRepository.findById(channel.getWorkspaceId())
-                .orElseThrow(() -> new ClientFaultException(DATA_INTEGRITY_FAILURE, "존재하지 않는 워크스페이스입니다. 데이터 무결성이 깨졌습니다."));
-
-         */
-
+    public void deleteChannel(Long channelId, User deleter) {
+        Channel channel = findChannel(channelId);
         Workspace workspace = channel.getWorkspace();
 
-        if (!workspace.getManagers()
-                .contains(deleter)) {
-            throw new ClientFaultException(FORBIDDEN, "워크스페이스의 매니저만 채널을 삭제할 수 있습니다.");
+        if (!workspace.isAdmin(deleter)) {
+            throw new ClientFaultException(PERMISSION_DENIED, "워크스페이스의 매니저만 채널을 삭제할 수 있습니다.");
         }
 
         //삭제
@@ -102,11 +91,10 @@ public class ChannelService {
     }
 
     public List<ChannelDto> getChannelsByWorkspaceId(String workspaceId, User user) {
-        Workspace workspace = workspaceRepository.findById(workspaceId)
-                .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 워크스페이스입니다."));
+        Workspace workspace = findWorkspace(workspaceId);
 
-        if (!workspace.hasUser(user.getId())) {
-            throw new ClientFaultException(FORBIDDEN, "워크스페이스에 가입되지 않은 사용자입니다.");
+        if (!workspace.hasUser(user)) {
+            throw new ClientFaultException(WORKSPACE_NOT_JOINED, "워크스페이스에 가입되지 않은 사용자입니다.");
         }
 
         return workspace.getChannels()
@@ -117,8 +105,7 @@ public class ChannelService {
     }
 
     public void changeToPublic(Long channelId) {
-        Channel channel = channelRepository.findById(channelId)
-                .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 채널입니다."));
+        Channel channel = findChannel(channelId);
 
         channel.changeToPublic();
         notifyChannelChanged(channel.getWorkspace());
@@ -128,21 +115,14 @@ public class ChannelService {
 
         String userId = channelMemberCreateRequestDto.getUserId();
 
-        Channel channel = channelRepository.findById(channelId)
-                .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 채널입니다."));
+        Channel channel = findChannel(channelId);
 
-        if (!channel.hasMember(loginUser) && !channel.getWorkspace()
-                .hasAuthority(loginUser)) {
+        //채널에 포함되어있어야만 멤버 추가 가능
+        if (!channel.hasMember(loginUser)) {
             throw new ClientFaultException(FORBIDDEN, "채널의 사용자를 추가할 권한이 없습니다.");
         }
 
-        if (!channel.getWorkspace()
-                .hasUser(userId)) {
-            throw new ClientFaultException(ENTITY_NOT_FOUND, "사용자가 워크스페이스에 참여하고 있지 않습니다.");
-        }
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 사용자입니다."));
+        User user = findUser(userId);
 
         addMemberToChannel(channel, user);
 
@@ -158,18 +138,33 @@ public class ChannelService {
 
         ChannelMember channelMember = new ChannelMember(channel, user);
         channelMemberRepository.save(channelMember);
-
         channel.addMember(channelMember);
     }
 
     public List<User> findMembers(Long channelId, String username, User loginUser) {
-        Channel channel = channelRepository.findById(channelId)
-                .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 채널입니다."));
+        Channel channel = findChannel(channelId);
 
-        if(!channel.hasMember(loginUser) && !channel.getWorkspace().hasAuthority(loginUser)) {
+        if(!channel.hasMember(loginUser) && !channel.getWorkspace().isAdmin(loginUser)) {
             throw new ClientFaultException(FORBIDDEN, "채널의 사용자를 조회할 권한이 없습니다.");
         }
 
         return channel.getMembers().stream().filter(user -> user.getNickname().contains(username)).toList();
+    }
+
+
+    //private common method
+    private User findUser(String userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(UserNotFound::new);
+    }
+
+    private Workspace findWorkspace(String workspaceId) {
+        return workspaceRepository.findById(workspaceId)
+                .orElseThrow(WorkspaceNotFound::new);
+    }
+
+    private Channel findChannel(Long channelId) {
+        return channelRepository.findById(channelId)
+                .orElseThrow(ChannelNotFound::new);
     }
 }
