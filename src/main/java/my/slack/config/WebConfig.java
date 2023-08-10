@@ -1,7 +1,6 @@
 package my.slack.config;
 
 import lombok.RequiredArgsConstructor;
-import my.slack.common.log.LogInterceptor;
 import my.slack.common.login.LoginInterceptor;
 import my.slack.common.login.LoginUserArgumentResolver;
 import org.springframework.context.annotation.Configuration;
@@ -14,9 +13,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-
-
-    private final LogInterceptor logInterceptor;
 
     List<String> excludePathPatterns = List.of(
             "/api/users/**",
@@ -34,13 +30,10 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(logInterceptor)
-                .addPathPatterns("/**");
 
         registry.addInterceptor(new LoginInterceptor())
                 .addPathPatterns("/api/**")
                 .excludePathPatterns(excludePathPatterns);
-
 
         //WebMvcConfigurer.super.addInterceptors(registry);
     }

@@ -2,12 +2,10 @@ package my.slack.websocket;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import my.slack.common.login.model.LoginInfo;
 import my.slack.websocket.dispatcher.WebSocketDispatcher;
 import my.slack.websocket.model.WebSocketMessageRequest;
-import my.slack.websocket.service.ActiveUserService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -15,18 +13,25 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class MyWebSocketHandler extends TextWebSocketHandler implements WebSocketMessageSender{
 
     private final ObjectMapper objectMapper;
-    private final ActiveUserService activeUserService;
     private final WebSocketDispatcher dispatcher;
+    private final WebSocketSessionsFactory sessionsFactory;
 
-    private static Set<WebSocketSession> sessions = ConcurrentHashMap.newKeySet();
+    private Set<WebSocketSession> sessions;
+
+    public MyWebSocketHandler(ObjectMapper objectMapper, WebSocketDispatcher dispatcher, WebSocketSessionsFactory sessionsFactory) {
+        this.objectMapper = objectMapper;
+        this.dispatcher = dispatcher;
+        this.sessionsFactory = sessionsFactory;
+        this.sessions = sessionsFactory.getSessions();
+        log.debug("sessions");
+        sessions.forEach(session -> log.debug(session.toString()));
+    }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {

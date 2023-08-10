@@ -10,7 +10,10 @@ import my.slack.domain.channel.model.ChannelCreateRequestDto;
 import my.slack.domain.member.Member;
 import my.slack.domain.member.MemberRepository;
 import my.slack.domain.user.UserRepository;
+import my.slack.domain.user.exception.UserNotFound;
 import my.slack.domain.user.model.User;
+import my.slack.domain.workspace.exception.WorkspaceNotFound;
+import my.slack.domain.workspace.exception.WorkspaceNotJoined;
 import my.slack.domain.workspace.model.Workspace;
 import my.slack.domain.workspace.model.WorkspaceCreateRequestDto;
 import my.slack.domain.workspace.model.WorkspaceDto;
@@ -20,8 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Comparator;
 import java.util.List;
 
-import static my.slack.api.ErrorCode.ENTITY_NOT_FOUND;
-import static my.slack.api.ErrorCode.FORBIDDEN;
+import static my.slack.api.ErrorCode.*;
 
 @Slf4j
 @Service
@@ -37,9 +39,7 @@ public class WorkspaceService {
 
     public WorkspaceDto createWorkspace(String creatorId, WorkspaceCreateRequestDto workspaceCreateRequestDto) {
 
-        User creator = userRepository.findById(creatorId)
-                .orElseThrow(
-                        () -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 사용자입니다."));
+        User creator = findUser(creatorId);
 
         //workspace 생성
         Workspace workspace = new Workspace(creator, workspaceCreateRequestDto.getName());
@@ -48,15 +48,14 @@ public class WorkspaceService {
         //요청받은 채널 생성
         String workspaceId = workspace.getId();
         ChannelCreateRequestDto channelCreateRequestDto = new ChannelCreateRequestDto(workspaceCreateRequestDto.getChannel(), "", false);
-        channelService.createChannel(workspaceId, creatorId, channelCreateRequestDto);
-
+        channelService.createChannel(workspaceId, creator, channelCreateRequestDto);
 
         return WorkspaceDto.of(savedWorkspace);
     }
 
     public List<WorkspaceDto> getUserWorkspaces(String userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 사용자입니다."));
+        User user = findUser(userId);
+
         return workspaceRepository.findByUser(user)
                 .stream()
                 .map(WorkspaceDto::of)
@@ -65,22 +64,16 @@ public class WorkspaceService {
 
 
     public WorkspaceDto findById(String id) {
-        Workspace workspace = workspaceRepository.findById(id)
-                .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 워크스페이스입니다."));
+        Workspace workspace = findWorkspace(id);
         return WorkspaceDto.of(workspace);
     }
 
     public void deleteWorkspace(String workspaceId, String deleterId) {
-        Workspace workspace = workspaceRepository.findById(workspaceId)
-                .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 워크스페이스입니다."));
+        Workspace workspace = findWorkspace(workspaceId);
+        User deleter = findUser(deleterId);
 
-        User deleter = userRepository.findById(deleterId)
-                .orElseThrow(
-                        () -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 사용자입니다."));
-
-        if (!workspace.getCreator()
-                .equals(deleter)) {
-            throw new ClientFaultException(FORBIDDEN, "워크스페이스 삭제 권한이 없습니다.");
+        if (!workspace.getCreator().equals(deleter)) {
+            throw new ClientFaultException(PERMISSION_DENIED, "워크스페이스 삭제 권한이 없습니다.");
         }
 
         workspaceRepository.delete(workspace);
@@ -88,12 +81,8 @@ public class WorkspaceService {
 
     public void enterWorkspace(String userId, String workspaceId) {
 
-        Workspace workspace = workspaceRepository.findById(workspaceId)
-                .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 워크스페이스입니다."));
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 사용자입니다."));
-
+        Workspace workspace = findWorkspace(workspaceId);
+        User user = findUser(userId);
 
         /*
         //허가된 email만이 workspace에 등록될 수 있음
@@ -107,7 +96,7 @@ public class WorkspaceService {
         if (!workspace.hasUser(userId)) {
             addMember(workspace, user);
         } else {
-            throw new ClientFaultException(FORBIDDEN, "이미 워크스페이스에 가입된 사용자입니다.");
+            throw new ClientFaultException(WORKSPACE_ALREADY_JOINED);
         }
 
         /*
@@ -125,29 +114,25 @@ public class WorkspaceService {
     private void addMember(Workspace workspace, User user) {
         Member member = new Member(workspace, user);
         memberRepository.save(member);
+        workspace.getMembers().add(member);
     }
 
     public List<User> getUsersByWorkspace(String workspaceId, String search, User loginUser) {
 
-        Workspace workspace = workspaceRepository.findById(workspaceId)
-                .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 워크스페이스입니다."));
+        Workspace workspace = findWorkspace(workspaceId);
 
-        if (!workspace.hasUser(loginUser.getId())) {
-            throw new ClientFaultException(FORBIDDEN, "워크스페이스에 가입되지 않은 사용자입니다.");
-        } else {
+        checkUserIsInWorkspace(workspace, loginUser);
 
-            List<User> users = workspace.getUsers()
-                    .stream()
-                    .filter(user -> user.getNickname()
-                            .contains(search))
-                    .sorted(Comparator.comparing(user -> user.getId()
-                            .equals(loginUser.getId()) ? 0 : 1))
-                    .toList();
+        List<User> users = workspace.getUsers()
+                .stream()
+                .filter(user -> user.getNickname()
+                        .contains(search))
+                .sorted(Comparator.comparing(user -> user.getId()
+                        .equals(loginUser.getId()) ? 0 : 1))
+                .toList();
 
-            log.debug("users: {}", users);
-
-            return users;
-        }
+        log.debug("users: {}", users);
+        return users;
     }
 
     public String createInviteLink(String workspaceId) {
@@ -155,19 +140,35 @@ public class WorkspaceService {
     }
 
     public List<User> searchWorkspaceUsers(String workspaceId, String searchName, @LoginUser User loginUser) {
-        Workspace workspace = workspaceRepository.findById(workspaceId)
-                .orElseThrow(() -> new ClientFaultException(ENTITY_NOT_FOUND, "존재하지 않는 워크스페이스입니다."));
+        Workspace workspace = findWorkspace(workspaceId);
 
-        if (!workspace.hasUser(loginUser.getId())) {
-            throw new ClientFaultException(FORBIDDEN, "워크스페이스에 가입되지 않은 사용자입니다.");
-        }
+        checkUserIsInWorkspace(workspace, loginUser);
 
         return workspace.getUsers()
                 .stream()
-                .filter(user -> user.getNickname()
-                        .contains(searchName))
+                .filter(user -> user.getNickname().contains(searchName))
                 .toList();
     }
+
+
+    //private Method
+    private User findUser(String userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(UserNotFound::new);
+    }
+
+    private Workspace findWorkspace(String workspaceId) {
+        return workspaceRepository.findById(workspaceId)
+                .orElseThrow(WorkspaceNotFound::new);
+    }
+
+    private void checkUserIsInWorkspace(Workspace workspace, User user) {
+        if (!workspace.hasUser(user)) {
+            throw new WorkspaceNotJoined();
+        }
+    }
+
+
 
 
 }

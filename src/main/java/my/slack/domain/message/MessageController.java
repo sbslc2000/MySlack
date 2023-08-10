@@ -25,16 +25,15 @@ public class MessageController {
      * @return
      */
     @GetMapping
-    public BaseResponse<List<MessageDto>> getMessages(@RequestParam Long channelId) {
-        return new BaseResponse<>(messageService.getMessagesByChannel(channelId));
+    public BaseResponse<List<MessageDto>> getMessages(@RequestParam Long channelId,@LoginUser User loginUser) {
+        return new BaseResponse<>(messageService.getMessagesByChannel(channelId,loginUser));
     }
 
     @PostMapping
-    public BaseResponse<String> sendMessage(@RequestBody MessageCreateRequestDto messageCreateRequestDto,
+    public BaseResponse<MessageDto> sendMessage(@RequestBody MessageCreateRequestDto messageCreateRequestDto,
                                             @LoginUser User loginUser) {
-        log.info("message create request");
-        messageService.addMessage(loginUser.getId(), messageCreateRequestDto);
-        return new BaseResponse<>("메시지를 보냈습니다.");
+        MessageDto messageDto = messageService.addMessage(loginUser.getId(), messageCreateRequestDto);
+        return new BaseResponse<>(messageDto);
     }
 
 

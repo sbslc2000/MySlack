@@ -10,6 +10,8 @@ import my.slack.domain.channel.model.ChannelCreateRequestDto;
 import my.slack.domain.channel.model.ChannelDto;
 import my.slack.domain.channel.model.ChannelMemberCreateRequestDto;
 import my.slack.domain.workspace.model.Workspace;
+import my.slack.socket.util.SendingMessageInfo;
+import org.aspectj.lang.annotation.After;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -17,12 +19,16 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class ChannelIntegratedTest extends BaseIntegratedTest {
+
+
 
     @Test
     @DisplayName("채널 생성 : 성공")
@@ -65,6 +71,8 @@ public class ChannelIntegratedTest extends BaseIntegratedTest {
         assertThat(result.isPrivate()).isEqualTo(isPrivate);
         assertThat(afterWorkspaceChannelSize).isEqualTo(beforeWorkspaceChannelSize + 1);
         assertThat(afterChannelRepositorySize).isEqualTo(beforeChannelRepositorySize + 1);
+
+        assertRefreshChannelListSocketMessage();
     }
 
     @Test
@@ -151,6 +159,28 @@ public class ChannelIntegratedTest extends BaseIntegratedTest {
         assertThat(result.size()).isEqualTo(4);
         assertThat(afterChannelMemberSize).isEqualTo(beforeChannelMemberSize + 1);
         assertThat(afterChannelMemberCount).isEqualTo(beforeChannelMemberCount + 1);
+
+        assertRefreshChannelListSocketMessage();
+    }
+
+    private void assertRefreshChannelListSocketMessage() {
+        //WebSocketMessage가 2개가 생성
+        Set<String> targetUserIds = Set.of("user1","user2");
+
+        assertThat(sendingMessageRecorder.size()).isEqualTo(2);
+        Set<SendingMessageInfo> messages = sendingMessageRecorder.getMessages();
+
+        //Message 가 정상적으로 전달됐는지
+        for(SendingMessageInfo message : messages) {
+            assertThat(message.getBody()).contains("REFRESH_CHANNEL_LIST");
+        }
+
+        //대상이 정상적으로 전달됐는지
+        Set<String> targetResult = messages.stream()
+                .map(m -> m.getUserId())
+                .collect(Collectors.toSet());
+
+        assertThat(targetResult).isEqualTo(targetUserIds);
     }
 
 }
