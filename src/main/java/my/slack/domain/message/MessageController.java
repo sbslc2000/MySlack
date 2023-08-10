@@ -30,11 +30,10 @@ public class MessageController {
     }
 
     @PostMapping
-    public BaseResponse<String> sendMessage(@RequestBody MessageCreateRequestDto messageCreateRequestDto,
+    public BaseResponse<MessageDto> sendMessage(@RequestBody MessageCreateRequestDto messageCreateRequestDto,
                                             @LoginUser User loginUser) {
-        log.info("message create request");
-        messageService.addMessage(loginUser.getId(), messageCreateRequestDto);
-        return new BaseResponse<>("메시지를 보냈습니다.");
+        MessageDto messageDto = messageService.addMessage(loginUser.getId(), messageCreateRequestDto);
+        return new BaseResponse<>(messageDto);
     }
 
 

@@ -19,6 +19,7 @@ import my.slack.domain.workspace.model.Workspace;
 import my.slack.websocket.WebSocketMessageSender;
 import my.slack.websocket.model.WebSocketMessageRequest;
 import my.slack.websocket.service.ActiveUserService;
+import my.slack.websocket.service.ActiveUserServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

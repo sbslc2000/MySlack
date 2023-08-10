@@ -6,14 +6,20 @@ import my.slack.api.response.BaseResponse;
 import my.slack.common.login.model.LoginInfo;
 import my.slack.domain.channel.ChannelMemberRepository;
 import my.slack.domain.channel.ChannelRepository;
+import my.slack.domain.message.MessageRepository;
+import my.slack.domain.user.UserRepository;
 import my.slack.domain.workspace.WorkspaceRepository;
+import my.slack.socket.util.SendingMessageRecorder;
+import org.aspectj.lang.annotation.After;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.test.web.servlet.MockMvc;
@@ -37,6 +43,7 @@ import java.time.LocalDateTime;
 @Disabled
 @AutoConfigureMockMvc
 @Transactional
+@Import(TestConfig.class)
 public class BaseIntegratedTest {
 
     @BeforeAll
@@ -57,12 +64,22 @@ public class BaseIntegratedTest {
             throw new RuntimeException(e);
         }
     }
+
+    @AfterEach
+    public void after() {
+        sendingMessageRecorder.clear();
+    }
+
+
     @Autowired protected TestRestTemplate restTemplate;
     @Autowired protected MockMvc mockMvc;
     @Autowired protected ObjectMapper objectMapper;
     @Autowired protected WorkspaceRepository workspaceRepository;
     @Autowired protected ChannelRepository channelRepository;
     @Autowired protected ChannelMemberRepository channelMemberRepository;
+    @Autowired protected MessageRepository messageRepository;
+    @Autowired protected UserRepository userRepository;
+    @Autowired protected SendingMessageRecorder sendingMessageRecorder;
 
     protected <T> T extractResult(BaseResponse response, Class<T> clazz) throws JsonProcessingException {
         Object result = response.getResult();
@@ -78,4 +95,6 @@ public class BaseIntegratedTest {
     protected LoginInfo getLoginInfo(String userId) {
         return new LoginInfo(userId, LocalDateTime.now(), LocalDateTime.now());
     }
+
+
 }
