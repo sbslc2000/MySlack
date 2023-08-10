@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -56,8 +57,7 @@ public class MessageIntegratedTest extends BaseIntegratedTest {
 
         long afterCount = messageRepository.count();
 
-        Channel channel = channelRepository.findById(channelId)
-                .get();
+        Channel channel = channelRepository.findById(channelId).get();
 
         assertThat(afterCount).isEqualTo(beforeCount+1);
         assertThat(result.getContent()).isEqualTo(messageCreateRequestDto.getContent());
@@ -73,5 +73,27 @@ public class MessageIntegratedTest extends BaseIntegratedTest {
         for(SendingMessageInfo message : messages){
             assertThat(message.getBody()).contains("REFRESH_MESSAGES");
         }
+    }
+
+    @Test
+    @DisplayName("메시지 조회 테스트: 성공")
+    void getMessages() throws Exception {
+        Long channelId = 1L;
+        String url = "/api/messages?channelId="+channelId;
+
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("loginInfo",getLoginInfo("user1"));
+
+        //when
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                        .session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        BaseResponse baseResponse = getBaseResponse(mvcResult);
+        List<MessageDto> result = extractResult(baseResponse, List.class);
+
+        //then
+        assertThat(result.size()).isEqualTo(3);
     }
 }
