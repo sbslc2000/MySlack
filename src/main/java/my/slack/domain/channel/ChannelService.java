@@ -2,6 +2,7 @@ package my.slack.domain.channel;
 
 import lombok.RequiredArgsConstructor;
 import my.slack.api.exception.ClientFaultException;
+import my.slack.common.socket.WebSocketNotifyService;
 import my.slack.domain.channel.exception.ChannelNotFound;
 import my.slack.domain.channel.model.*;
 import my.slack.domain.user.UserRepository;
@@ -28,12 +29,12 @@ import static my.slack.api.ErrorCode.*;
 public class ChannelService {
 
     private final ChannelRepository channelRepository;
-    private final UserService userService;
     private final UserRepository userRepository;
     private final WorkspaceRepository workspaceRepository;
     private final ActiveUserService activeUserService;
     private final WebSocketMessageSender webSocketMessageSender;
     private final ChannelMemberRepository channelMemberRepository;
+    private final WebSocketNotifyService webSocketNotifyService;
 
     public ChannelDto createChannel(String workspaceId, User loginUser, ChannelCreateRequestDto channelCreateRequestDto) {
         User creator = loginUser;
@@ -55,24 +56,8 @@ public class ChannelService {
         //Workspace 에 채널 추가
         workspace.addChannel(channel);
 
-        notifyChannelChanged(workspace);
+        webSocketNotifyService.notifyChannelChanged(workspace);
         return ChannelDto.of(channel);
-    }
-
-    private void notifyChannelChanged(Workspace workspace) {
-
-        List<User> targetUsers = new ArrayList<>();
-        List<User> activeUsers = activeUserService.getActiveUsers();
-
-        activeUsers.forEach((user) -> {
-            if (workspace.hasUser(user.getId())) {
-                targetUsers.add(user);
-            }
-        });
-
-
-        WebSocketMessageRequest req = new WebSocketMessageRequest("REFRESH_CHANNEL_LIST", null, targetUsers);
-        webSocketMessageSender.sendMessage(req);
     }
 
     public void deleteChannel(Long channelId, User deleter) {
@@ -86,7 +71,7 @@ public class ChannelService {
         //삭제
         workspace.removeChannel(channel);
 
-        notifyChannelChanged(workspace);
+        webSocketNotifyService.notifyChannelChanged(workspace);
         channelRepository.delete(channel);
     }
 
@@ -108,7 +93,7 @@ public class ChannelService {
         Channel channel = findChannel(channelId);
 
         channel.changeToPublic();
-        notifyChannelChanged(channel.getWorkspace());
+        webSocketNotifyService.notifyChannelChanged(channel.getWorkspace());
     }
 
     public List<User> addMembers(Long channelId, ChannelMemberCreateRequestDto channelMemberCreateRequestDto, User loginUser) {
@@ -126,7 +111,7 @@ public class ChannelService {
 
         addMemberToChannel(channel, user);
 
-        notifyChannelChanged(channel.getWorkspace());
+        webSocketNotifyService.notifyChannelChanged(channel.getWorkspace());
         return channel.getMembers();
     }
 
