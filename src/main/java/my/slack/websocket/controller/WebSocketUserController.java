@@ -3,14 +3,13 @@ package my.slack.websocket.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import my.slack.domain.user.model.User;
-import my.slack.domain.workspace.MemoryWorkspaceRepository;
 import my.slack.domain.workspace.WorkspaceRepository;
-import my.slack.domain.workspace.WorkspaceService;
 import my.slack.domain.workspace.model.Workspace;
 import my.slack.websocket.annotation.MessageMapping;
 import my.slack.websocket.annotation.ResponseMessage;
 import my.slack.websocket.annotation.WebSocketSessionAttribute;
 import my.slack.websocket.service.ActiveUserService;
+import my.slack.websocket.service.ActiveUserServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
