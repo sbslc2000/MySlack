@@ -18,13 +18,13 @@ export const postMessage = async (dto) => {
 
 export const getMessages = async (channelId) => {
 
-    MyLogger.debug("[GET] /api/messages called");
+    MyLogger.debug("[GET] /api/channels/"+channelId+"/messages called");
     if(channelId == null) {
         channelId = document.location.href.split("/")[7];
     }
 
     try {
-        const response = await axios.get(BASE_URL+"/api/messages?channelId="+channelId);
+        const response = await axios.get(BASE_URL+"/api/channels/"+channelId+"/messages");
         MyLogger.debug(response.data.result);
         return response.data.result;
     } catch (err) {
