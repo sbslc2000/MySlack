@@ -9,6 +9,7 @@ import my.slack.domain.channel.model.Channel;
 import my.slack.domain.channel.model.ChannelCreateRequestDto;
 import my.slack.domain.channel.model.ChannelDto;
 import my.slack.domain.channel.model.ChannelMemberCreateRequestDto;
+import my.slack.domain.message.model.MessageDto;
 import my.slack.domain.workspace.model.Workspace;
 import my.slack.socket.util.SendingMessageInfo;
 import org.aspectj.lang.annotation.After;
@@ -28,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class ChannelIntegratedTest extends BaseIntegratedTest {
 
-
+    private static final String BASE_URL = "/api/channels";
 
     @Test
     @DisplayName("채널 생성 : 성공")
@@ -38,7 +39,7 @@ public class ChannelIntegratedTest extends BaseIntegratedTest {
         String description = "description for newChannelName";
         Boolean isPrivate = false;
         String workspaceId = "workspace1";
-        ChannelCreateRequestDto channelCreateRequestDto = new ChannelCreateRequestDto(channelName,description,isPrivate);
+        ChannelCreateRequestDto channelCreateRequestDto = new ChannelCreateRequestDto(workspaceId,channelName,description,isPrivate);
         String requestBody = objectMapper.writeValueAsString(channelCreateRequestDto);
 
         MockHttpSession session = new MockHttpSession();
@@ -51,7 +52,7 @@ public class ChannelIntegratedTest extends BaseIntegratedTest {
 
 
         //when
-        MvcResult mvcResult = mockMvc.perform(post("/api/workspaces/" + workspaceId + "/channels")
+        MvcResult mvcResult = mockMvc.perform(post(BASE_URL)
                         .session(session)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
@@ -75,50 +76,7 @@ public class ChannelIntegratedTest extends BaseIntegratedTest {
         assertRefreshChannelListSocketMessage();
     }
 
-    @Test
-    @DisplayName("채널 조회: 성공")
-    void getChannels() throws Exception {
 
-        String workspaceId = "workspace1";
-
-        MockHttpSession session = new MockHttpSession();
-        session.setAttribute("loginInfo",getLoginInfo("user1"));
-
-        //when
-        MvcResult mvcResult = mockMvc.perform(get("/api/workspaces/" + workspaceId + "/channels")
-                        .session(session)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        BaseResponse baseResponse = getBaseResponse(mvcResult);
-        List result = extractResult(baseResponse, List.class);
-
-        //then
-        assertThat(result.size()).isEqualTo(2);
-    }
-
-    @Test
-    @DisplayName("채널 조회: 접근 권한이 있는 채널만 조회")
-    void getChannelByAuthorities() throws Exception {
-        String workspaceId = "workspace1";
-
-        MockHttpSession session = new MockHttpSession();
-        session.setAttribute("loginInfo",getLoginInfo("user4"));
-
-        //when
-        MvcResult mvcResult = mockMvc.perform(get("/api/workspaces/" + workspaceId + "/channels")
-                        .session(session)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        BaseResponse baseResponse = getBaseResponse(mvcResult);
-        List result = extractResult(baseResponse, List.class);
-
-        //then
-        assertThat(result.size()).isEqualTo(1);
-    }
 
     @Test
     @DisplayName("채널 멤버 추가: 성공")
@@ -139,7 +97,7 @@ public class ChannelIntegratedTest extends BaseIntegratedTest {
         long beforeChannelMemberCount = channelMemberRepository.count();
 
         //when
-        MvcResult mvcResult = mockMvc.perform(post("/api/workspaces/" + workspaceId + "/channels/" + channelId + "/members")
+            MvcResult mvcResult = mockMvc.perform(post(BASE_URL + "/" + channelId + "/members")
                         .session(session)
                         .content(requestBody)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -183,4 +141,25 @@ public class ChannelIntegratedTest extends BaseIntegratedTest {
         assertThat(targetResult).isEqualTo(targetUserIds);
     }
 
+    @Test
+    @DisplayName("채널 메시지 조회 테스트: 성공")
+    void getMessages() throws Exception {
+        Long channelId = 1L;
+        String url = BASE_URL+ "/" + channelId + "/messages";
+
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("loginInfo",getLoginInfo("user1"));
+
+        //when
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                        .session(session))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        BaseResponse baseResponse = getBaseResponse(mvcResult);
+        List<MessageDto> result = extractResult(baseResponse, List.class);
+
+        //then
+        assertThat(result.size()).isEqualTo(3);
+    }
 }

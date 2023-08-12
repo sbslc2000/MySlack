@@ -75,25 +75,5 @@ public class MessageIntegratedTest extends BaseIntegratedTest {
         }
     }
 
-    @Test
-    @DisplayName("메시지 조회 테스트: 성공")
-    void getMessages() throws Exception {
-        Long channelId = 1L;
-        String url = "/api/messages?channelId="+channelId;
 
-        MockHttpSession session = new MockHttpSession();
-        session.setAttribute("loginInfo",getLoginInfo("user1"));
-
-        //when
-        MvcResult mvcResult = mockMvc.perform(get(url)
-                        .session(session))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        BaseResponse baseResponse = getBaseResponse(mvcResult);
-        List<MessageDto> result = extractResult(baseResponse, List.class);
-
-        //then
-        assertThat(result.size()).isEqualTo(3);
-    }
 }

@@ -31,20 +31,17 @@ public class ChannelService {
     private final ChannelRepository channelRepository;
     private final UserRepository userRepository;
     private final WorkspaceRepository workspaceRepository;
-    private final ActiveUserService activeUserService;
-    private final WebSocketMessageSender webSocketMessageSender;
     private final ChannelMemberRepository channelMemberRepository;
     private final WebSocketNotifyService webSocketNotifyService;
 
-    public ChannelDto createChannel(String workspaceId, User loginUser, ChannelCreateRequestDto channelCreateRequestDto) {
+    public ChannelDto createChannel(ChannelCreateRequestDto channelCreateRequestDto,User loginUser) {
         User creator = loginUser;
-        Workspace workspace = findWorkspace(workspaceId);
+        Workspace workspace = findWorkspace(channelCreateRequestDto.getWorkspaceId());
 
         //channel의 creator 가 workspace의 manager인가?
         //if(!workspace.hasAuthority(creator)) {
         //    throw new ClientFaultException(FORBIDDEN, "워크스페이스의 매니저만 채널을 생성할 수 있습니다.");
         //}
-
 
         Channel channel = new Channel(workspace, creator, channelCreateRequestDto.getName(), channelCreateRequestDto.getDescription(), channelCreateRequestDto.isPrivate());
         channelRepository.save(channel);

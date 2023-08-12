@@ -6,6 +6,8 @@ import my.slack.common.login.LoginUser;
 import my.slack.domain.channel.model.ChannelCreateRequestDto;
 import my.slack.domain.channel.model.ChannelDto;
 import my.slack.domain.channel.model.ChannelMemberCreateRequestDto;
+import my.slack.domain.message.MessageService;
+import my.slack.domain.message.model.MessageDto;
 import my.slack.domain.user.model.User;
 import my.slack.domain.workspace.WorkspaceService;
 import org.springframework.web.bind.annotation.*;
@@ -14,24 +16,17 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/workspaces/{workspaceId}/channels")
+@RequestMapping("/api/channels")
 public class ChannelController {
 
     private final ChannelService channelService;
-    private final WorkspaceService workspaceService;
+    private final MessageService messageService;
 
     @PostMapping
-    public BaseResponse<ChannelDto> addChannel(@PathVariable String workspaceId, @RequestBody ChannelCreateRequestDto channelCreateRequestDto,
+    public BaseResponse<ChannelDto> addChannel(@RequestBody ChannelCreateRequestDto channelCreateRequestDto,
                                                @LoginUser User loginUser) {
-        ChannelDto channelDto = channelService.createChannel(workspaceId, loginUser, channelCreateRequestDto);
+        ChannelDto channelDto = channelService.createChannel(channelCreateRequestDto, loginUser);
         return new BaseResponse<>(channelDto);
-    }
-
-    @GetMapping
-    public BaseResponse<List<ChannelDto>> getChannelsByWorkspace(@PathVariable String workspaceId,
-                                                                 @LoginUser User loginUser) {
-        List<ChannelDto> channelDtos = channelService.getChannelsByWorkspaceId(workspaceId, loginUser);
-        return new BaseResponse<>(channelDtos);
     }
 
     @DeleteMapping("/{channelId}")
@@ -48,14 +43,19 @@ public class ChannelController {
         return new BaseResponse<>(members);
     }
 
+    @GetMapping("/{channelId}/messages")
+    public BaseResponse<List<MessageDto>> getMessagesByChannel(@PathVariable Long channelId,
+                                                         @LoginUser User loginUser) {
+        List<MessageDto> messageDtos = messageService.getMessagesByChannel(channelId, loginUser);
+        return new BaseResponse<>(messageDtos);
+    }
+
     @PostMapping("/{channelId}/members")
     public BaseResponse<List<User>> addMember(@PathVariable Long channelId, @RequestBody ChannelMemberCreateRequestDto channelMemberCreateRequestDto,
                                               @LoginUser User loginUser) {
         List<User> members = channelService.addMembers(channelId, channelMemberCreateRequestDto, loginUser);
         return new BaseResponse<>(members);
     }
-
-
 
 
 }
