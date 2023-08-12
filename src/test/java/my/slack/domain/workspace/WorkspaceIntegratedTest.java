@@ -32,11 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class WorkspaceIntegratedTest extends BaseIntegratedTest {
 
-    @Autowired
-    private WorkspaceRepository workspaceRepository;
-
-
-
+    private static final String BASE_URL = "/api/workspaces";
 
     @Test
     @DisplayName("워크스페이스 단일 조회 테스트 : 성공")
@@ -277,6 +273,52 @@ public class WorkspaceIntegratedTest extends BaseIntegratedTest {
         assertThat(baseResponse.isIsSuccess()).isTrue();
         assertThat(result.size()).isEqualTo(1);
         assertThat(user.getNickname()).isEqualTo("User 2");
+    }
+
+    @Test
+    @DisplayName("채널 조회: 성공")
+    void getChannels() throws Exception {
+        String workspaceId = "workspace1";
+        String url = BASE_URL+"/"+workspaceId+"/channels";
+
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("loginInfo",getLoginInfo("user1"));
+
+        //when
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                        .session(session)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        BaseResponse baseResponse = getBaseResponse(mvcResult);
+        List result = extractResult(baseResponse, List.class);
+
+        //then
+        assertThat(result.size()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("채널 조회: 접근 권한이 있는 채널만 조회")
+    void getChannelByAuthorities() throws Exception {
+        String workspaceId = "workspace1";
+        String url = BASE_URL+"/"+workspaceId+"/channels";
+
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("loginInfo",getLoginInfo("user4"));
+
+        //when
+        MvcResult mvcResult = mockMvc.perform(get(url)
+                        .session(session)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        BaseResponse baseResponse = getBaseResponse(mvcResult);
+        List result = extractResult(baseResponse, List.class);
+
+        //then
+        assertThat(result.size()).isEqualTo(1);
     }
 
 }

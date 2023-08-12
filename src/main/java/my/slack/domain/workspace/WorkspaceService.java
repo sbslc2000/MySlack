@@ -7,6 +7,7 @@ import my.slack.common.login.LoginUser;
 import my.slack.domain.channel.ChannelRepository;
 import my.slack.domain.channel.ChannelService;
 import my.slack.domain.channel.model.ChannelCreateRequestDto;
+import my.slack.domain.channel.model.ChannelDto;
 import my.slack.domain.member.Member;
 import my.slack.domain.member.MemberRepository;
 import my.slack.domain.user.UserRepository;
@@ -47,8 +48,8 @@ public class WorkspaceService {
 
         //요청받은 채널 생성
         String workspaceId = workspace.getId();
-        ChannelCreateRequestDto channelCreateRequestDto = new ChannelCreateRequestDto(workspaceCreateRequestDto.getChannel(), "", false);
-        channelService.createChannel(workspaceId, creator, channelCreateRequestDto);
+        ChannelCreateRequestDto channelCreateRequestDto = new ChannelCreateRequestDto(workspaceId,workspaceCreateRequestDto.getChannel(), "", false);
+        channelService.createChannel(channelCreateRequestDto,creator);
 
         return WorkspaceDto.of(savedWorkspace);
     }
@@ -149,7 +150,6 @@ public class WorkspaceService {
                 .filter(user -> user.getNickname().contains(searchName))
                 .toList();
     }
-
 
     //private Method
     private User findUser(String userId) {

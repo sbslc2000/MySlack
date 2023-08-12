@@ -4,6 +4,7 @@ package my.slack.domain.message;
 import lombok.RequiredArgsConstructor;
 import my.slack.api.ErrorCode;
 import my.slack.api.exception.ClientFaultException;
+import my.slack.common.socket.WebSocketNotifyService;
 import my.slack.domain.channel.ChannelRepository;
 import my.slack.domain.channel.exception.ChannelNotFound;
 import my.slack.domain.channel.model.Channel;
@@ -30,12 +31,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional
 public class MessageService {
-    private final WorkspaceRepository workspaceRepository;
     private final ChannelRepository channelRepository;
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
-    private final ActiveUserService activeUserService;
-    private final WebSocketMessageSender webSocketMessageSender;
+    private final WebSocketNotifyService webSocketNotifyService;
+
 
     /**
      * @param userId
@@ -59,26 +59,11 @@ public class MessageService {
         Message createdMessage = messageRepository.save(message);
 
         //channel.addMessage(message);
-        notifyMessageCreated(workspace, channel.getId());
+        webSocketNotifyService.notifyMessageCreated(workspace, channel.getId());
 
         return MessageDto.of(createdMessage);
     }
 
-    private void notifyMessageCreated(Workspace workspace, Long channelId) {
-
-        List<User> targetUsers = new ArrayList<>();
-        List<User> activeUsers = activeUserService.getActiveUsers();
-
-        activeUsers.forEach((user) -> {
-            if (workspace.hasUser(user.getId())) {
-                targetUsers.add(user);
-            }
-        });
-
-        MessageNotifyDto dto = new MessageNotifyDto(channelId);
-        WebSocketMessageRequest req = new WebSocketMessageRequest("REFRESH_MESSAGES", dto, targetUsers);
-        webSocketMessageSender.sendMessage(req);
-    }
 
     public List<MessageDto> getMessagesByChannel(Long channelId, User loginUser) {
 
