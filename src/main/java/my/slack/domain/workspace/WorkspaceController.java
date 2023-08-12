@@ -6,6 +6,8 @@ import my.slack.api.ErrorCode;
 import my.slack.api.exception.ClientFaultException;
 import my.slack.api.response.BaseResponse;
 import my.slack.common.login.LoginUser;
+import my.slack.domain.channel.ChannelService;
+import my.slack.domain.channel.model.ChannelDto;
 import my.slack.domain.user.model.User;
 import my.slack.domain.workspace.model.WorkspaceCreateRequestDto;
 import my.slack.domain.workspace.model.WorkspaceDto;
@@ -20,6 +22,7 @@ import java.util.List;
 public class WorkspaceController {
 
     private final WorkspaceService workspaceService;
+    private final ChannelService channelService;
 
     @GetMapping("/{workspaceId}")
     public BaseResponse<WorkspaceDto> getWorkspace(@PathVariable String workspaceId) {
@@ -39,6 +42,12 @@ public class WorkspaceController {
                                                           @RequestParam(defaultValue = "") String search) {
 
         return new BaseResponse<>(workspaceService.getUsersByWorkspace(workspaceId, search, loginUser));
+    }
+
+    @GetMapping("/{workspaceId}/channels")
+    public BaseResponse<List<ChannelDto>> getChannelsByWorkspace(@PathVariable String workspaceId,
+                                                                 @LoginUser User loginUser) {
+        return new BaseResponse<>(channelService.getChannelsByWorkspaceId(workspaceId, loginUser));
     }
 
     @PostMapping
