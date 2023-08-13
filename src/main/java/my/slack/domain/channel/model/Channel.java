@@ -27,6 +27,8 @@ public class Channel extends BaseTimeEntity {
     @JoinColumn(name = "creator_id")
     private User creator;
 
+    private boolean isPrivate;
+
     @ManyToOne
     @Setter
     @JoinColumn(name = "workspace_id")
@@ -38,7 +40,6 @@ public class Channel extends BaseTimeEntity {
     @OneToMany(mappedBy = "channel", cascade = CascadeType.REMOVE)
     private final List<ChannelMember> channelMembers = new ArrayList<>();
 
-    private boolean isPrivate;
 
 
     public Channel(Workspace workspace, User creator, String name, String description, boolean isPrivate) {

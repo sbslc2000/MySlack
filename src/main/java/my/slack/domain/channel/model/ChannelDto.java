@@ -1,5 +1,6 @@
 package my.slack.domain.channel.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import my.slack.domain.user.model.User;
 
@@ -14,6 +15,7 @@ public class ChannelDto {
     private User creator;
     private List<User> members;
 
+    @JsonProperty("isPrivate")
     private boolean isPrivate;
     private LocalDateTime createdAt;
 
