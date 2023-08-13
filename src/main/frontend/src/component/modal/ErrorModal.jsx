@@ -3,6 +3,7 @@ import SlackDefaultButton from "../../ui/SlackDefaultButton";
 import ModalHeader from "./structure/ModalHeader";
 import ModalBody from "./structure/ModalBody";
 import ModalFooter from "./structure/ModalFooter";
+import ModalFrame from "./structure/ModalFrame";
 
 
 
@@ -20,12 +21,6 @@ const ModalContent = styled.div`
 const HeaderText = styled.h1`
     font-weight:900;
 `;
-
-
-
-
-
-
 
 function ErrorModal(props) {
 
@@ -56,19 +51,13 @@ function ErrorModal(props) {
 
 
     return (
-        <div  className="modal fade" id="error" tabIndex="-1" aria-labelledby="exampleModalLabel"
-              aria-hidden="true">
-            <ModalDialog width={width} className="modal-dialog modal-dialog-centered">
-                <ModalContent className="modal-content">
-                    {modalHeader}
-                    <div style={{color:"#C7C8C9"}}>
-                        {modalBody}
-                    </div>
-
-                    {modalFooter}
-                </ModalContent>
-            </ModalDialog>
-        </div>
+        <ModalFrame width={width} id="error">
+            {modalHeader}
+            <div style={{color:"#C7C8C9"}}>
+                {modalBody}
+            </div>
+            {modalFooter}
+        </ModalFrame>
     );
 }
 

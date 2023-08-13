@@ -6,6 +6,7 @@ import axios from "axios";
 import {useEffect, useState} from "react";
 import DefaultButton from "../ui/DefaultButton";
 import WorkspaceSelector from "../component/home/WorkspaceSelector";
+import {getMyUser} from "../api/user";
 
 const Tab = styled.div`
     border: 0px solid gray;
@@ -27,17 +28,15 @@ const SocialLoginButton = styled.button`
 function HomePage() {
 
     const [isLogined,setIsLogined] = useState(false);
-    const [userInfo,setUserInfo] = useState({}); 
+    const [userInfo,setUserInfo] = useState({});
+
     const loginCheck = () => {
-        axios.get("/api/users/me").then((response) => {
-            if(response.data.isSuccess) {
-                setIsLogined(true);
-                setUserInfo(response.data.result);
-            } else {
-                setIsLogined(false);
-                setUserInfo({});
-            }
-            
+        getMyUser().then((response) => {
+            setIsLogined(true);
+            setUserInfo(response);
+        }).catch((error) => {
+            setIsLogined(false);
+            setUserInfo({});
         });
     }
 

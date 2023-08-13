@@ -32,3 +32,16 @@ export const getUsersInWorkspace = async (workspaceId) => {
         return null;
     }
 }
+
+export const getMyUser = async () => {
+    MyLogger.debug("[GET] /api/users/me called");
+
+    try {
+        const response = await axios.get(BASE_URL+"/api/users/me");
+        MyLogger.debug(response.data.result);
+        return response.data.result;
+    } catch (error) {
+        MyLogger.error(error.data.code, error.data.message);
+        return null;
+    }
+}
