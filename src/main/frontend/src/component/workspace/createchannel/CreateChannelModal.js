@@ -46,8 +46,9 @@ function CreateChannelModal(props) {
         body.name = channelName;
         body.isPrivate = isPrivate;
         body.description = "";
+        body.workspaceId = props.workspace.id;
 
-        axios.post("/api/workspaces/"+props.workspace.id+"/channels",body).then((response) => {
+        axios.post("/api/channels",body).then((response) => {
             if(response.data.isSuccess){
                 setProgress(0);
                 setChannelName("");
