@@ -15,6 +15,7 @@ import ErrorModal from "../component/modal/ErrorModal";
 import {getUser} from "../api/user";
 import {getChannelsByWorkspaceId} from "../api/channel";
 import {getWorkspace} from "../api/workspace";
+import AddMemberToChannelModal from "../component/modal/AddMemberToChannelModal";
 
 
 const RefreshContext = React.createContext();
@@ -255,6 +256,7 @@ function WorkspacePage() {
                         <CreateChannelModal channelState={channelState} workspace={workspace}></CreateChannelModal>
                         <InviteWorkspaceModal workspace={workspace}></InviteWorkspaceModal>
                         <ErrorModal> </ErrorModal>
+                        <AddMemberToChannelModal></AddMemberToChannelModal>
                     </div>
                 </RefreshContext.Provider>
             </ChannelContext.Provider>

@@ -2,11 +2,13 @@ package my.slack.domain.message.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import my.slack.domain.user.model.User;
 
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 public class MessageDto {
     private Long id;

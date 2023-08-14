@@ -162,4 +162,5 @@ public class ChannelIntegratedTest extends BaseIntegratedTest {
         //then
         assertThat(result.size()).isEqualTo(3);
     }
+
 }

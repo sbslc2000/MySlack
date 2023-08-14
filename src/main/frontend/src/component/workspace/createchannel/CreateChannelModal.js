@@ -2,6 +2,7 @@ import styled from "styled-components";
 import SlackDefaultButton from "../../../ui/SlackDefaultButton";
 import {useState} from "react";
 import axios from "axios";
+import ModalFrame from "../../modal/structure/ModalFrame";
 
 
 const ModalDialog = styled.div`
@@ -46,8 +47,9 @@ function CreateChannelModal(props) {
         body.name = channelName;
         body.isPrivate = isPrivate;
         body.description = "";
+        body.workspaceId = props.workspace.id;
 
-        axios.post("/api/workspaces/"+props.workspace.id+"/channels",body).then((response) => {
+        axios.post("/api/channels",body).then((response) => {
             if(response.data.isSuccess){
                 setProgress(0);
                 setChannelName("");
@@ -153,19 +155,14 @@ function CreateChannelModal(props) {
         </div>
     );
     return (
-        <div  className="modal fade" id="createChannel" tabIndex="-1" aria-labelledby="exampleModalLabel"
-             aria-hidden="true">
-            <ModalDialog className="modal-dialog modal-dialog-centered">
-                <ModalContent className="modal-content">
-                    {modalHeader}
-                    <div style={{color:"#C7C8C9"}}>
-                        {modalBody}
-                    </div>
+        <ModalFrame id="createChannel" width={600}>
+            {modalHeader}
+            <div style={{color:"#C7C8C9"}}>
+                {modalBody}
+            </div>
 
-                    {modalFooter}
-                </ModalContent>
-            </ModalDialog>
-        </div>
+            {modalFooter}
+        </ModalFrame>
     );
 }
 
