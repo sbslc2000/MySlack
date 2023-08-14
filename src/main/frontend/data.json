@@ -1,4 +1,9 @@
 {
+  "greeting" : {
+    "isSuccess": true,
+    "message": "성공",
+    "result": "Hello World!"
+  },
   "api_users_me_workspaces": {
     "isSuccess": true,
     "message": "성공",
@@ -193,7 +198,7 @@
       }
     ]
   },
-  "api_workspaces_1_channels_1_messages": {
+  "api_channels_1_messages": {
     "isSuccess": true,
     "message": "성공",
     "result": [
