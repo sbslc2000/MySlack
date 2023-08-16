@@ -115,7 +115,7 @@ function WorkspacePage() {
     useEffect(() => {
         if (!ws.current) {
 
-            const webSocketUrl = "ws://localhost:8080/ws";
+            const webSocketUrl = "ws://"+process.env.REACT_APP_BASE_URL+"/ws";
             ws.current = new WebSocket(webSocketUrl);
             ws.current.onopen = () => {
                 console.log("connected to " + webSocketUrl);
