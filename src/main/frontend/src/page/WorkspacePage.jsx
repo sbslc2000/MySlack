@@ -16,6 +16,7 @@ import {getUser} from "../api/user";
 import {getChannelsByWorkspaceId} from "../api/channel";
 import {getWorkspace} from "../api/workspace";
 import AddMemberToChannelModal from "../component/modal/AddMemberToChannelModal";
+import {Environment} from "../api/Environment";
 
 
 const RefreshContext = React.createContext();
@@ -115,7 +116,7 @@ function WorkspacePage() {
     useEffect(() => {
         if (!ws.current) {
 
-            const webSocketUrl = "wss://"+process.env.REACT_APP_BASE_URL+"/ws";
+            const webSocketUrl = Environment.SOCKET_PROTOCOL+"://"+Environment.BACKEND_API_HOST+"/ws";
             ws.current = new WebSocket(webSocketUrl);
             ws.current.onopen = () => {
                 console.log("connected to " + webSocketUrl);

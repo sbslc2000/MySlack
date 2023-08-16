@@ -7,6 +7,7 @@ import {useEffect, useState} from "react";
 import DefaultButton from "../ui/DefaultButton";
 import WorkspaceSelector from "../component/home/WorkspaceSelector";
 import {getMyUser} from "../api/user";
+import {Environment} from "../api/Environment";
 
 const Tab = styled.div`
     border: 0px solid gray;
@@ -54,7 +55,7 @@ function HomePage() {
 
     function onLoginButtonClick() {
         console.log("onLoginButtonClick");
-        window.location.href = "https://accounts.google.com/o/oauth2/auth/oauthchooseaccount?client_id=975667075932-1t71d0nrajvg1qpgev1biqtks45v2saf.apps.googleusercontent.com&redirect_uri="+process.env.REACT_APP_REDIRECT_URI+"&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&service=lso&o2v=1&flowName=GeneralOAuthFlow";
+        window.location.href = "https://accounts.google.com/o/oauth2/auth/oauthchooseaccount?client_id=975667075932-1t71d0nrajvg1qpgev1biqtks45v2saf.apps.googleusercontent.com&redirect_uri="+Environment.OAUTH_LOGIN_REDIRECT_URL+"&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&service=lso&o2v=1&flowName=GeneralOAuthFlow";
     }
 
     let content = isLogined ?
