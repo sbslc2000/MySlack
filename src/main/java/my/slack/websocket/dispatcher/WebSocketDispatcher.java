@@ -7,11 +7,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import my.slack.domain.user.UserRepository;
 import my.slack.domain.user.model.User;
+import my.slack.util.ClassLister;
 import my.slack.websocket.annotation.MessageMapping;
 import my.slack.websocket.annotation.ResponseMessage;
 import my.slack.websocket.annotation.WebSocketSessionAttribute;
 import my.slack.websocket.model.WebSocketMessageRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -26,11 +29,18 @@ import java.util.*;
 @Component
 @RequiredArgsConstructor
 public class WebSocketDispatcher {
-    private static final String SERVICE_PACKAGE_NAME = "my.slack.websocket.controller";
+
+    @Value("${websocket.dispatcher.scan-package}")
+    private String SERVICE_PACKAGE_NAME;
+
+    @Value("${websocket.dispatcher.scan-directory}")
+    private String SCAN_DIRECTORY;
 
     private final ObjectMapper objectMapper;
     private MappingTable mappingTable;
     private final ApplicationContext ac;
+
+    private final ClassLister classLister;
 
     @PostConstruct
     public void init() {
@@ -38,8 +48,10 @@ public class WebSocketDispatcher {
         String packageName = SERVICE_PACKAGE_NAME;
         mappingTable = new MappingTable();
 
+
         try {
-            List<Class<?>> classes = getClassesInPackage(packageName);
+            //List<Class<?>> classes = getClassesInPackage(packageName);
+            List<Class<?>> classes = classLister.listClassFiles(SCAN_DIRECTORY, SERVICE_PACKAGE_NAME);
             log.debug("Target Classes: {}개", classes.size());
             for (Class<?> clazz : classes) {
                 Method[] methods = clazz.getDeclaredMethods();
@@ -78,7 +90,6 @@ public class WebSocketDispatcher {
 
         Enumeration<URL> resources = classLoader.getResources(path);
 
-
         List<String> resourceNames = new ArrayList<>();
         while(resources.hasMoreElements()) {
             URL resource = resources.nextElement();
@@ -95,7 +106,6 @@ public class WebSocketDispatcher {
                     }
                 }
             }
-
         }
 
         log.debug("classNames : {}", resourceNames);
@@ -110,7 +120,6 @@ public class WebSocketDispatcher {
         log.debug("classes : {}", classes);
         return classes;
     }
-
 
     public WebSocketMessageRequest dispatch(String userId, String message, JsonNode body) throws Exception {
         log.debug("WebSocketDispatcher.dispatch() 호출");
