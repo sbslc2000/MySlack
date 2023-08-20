@@ -2,7 +2,13 @@ import styled from "styled-components";
 
 import defaultUserImg from "../../../img/default_user.png";
 
-const Wrapper = styled.img`
+const Wrapper = styled.div`
+  position:relative;
+  top:8px;
+  margin-right:16px;
+`;
+
+const Img = styled.img`
     width: 26px;
     height: 26px;
     border-radius:4px;
@@ -22,12 +28,10 @@ const OnlineStatus = styled.i`
 
 function UserIcon() {
     return (
-        <div>
-            <Wrapper src={defaultUserImg}>
-
-            </Wrapper>
+        <Wrapper>
+            <Img src={defaultUserImg}/>
             <OnlineStatus></OnlineStatus>
-        </div>
+        </Wrapper>
 
     )
 }

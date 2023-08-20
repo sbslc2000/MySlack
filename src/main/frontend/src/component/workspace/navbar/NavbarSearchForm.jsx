@@ -2,6 +2,7 @@ import styled from "styled-components";
 
 
 const Input = styled.input`
+    display: block;
     background-color: #38373C;
     width:732px;
     height:26px;
@@ -22,9 +23,7 @@ const Input = styled.input`
 `;
 function NavbarSearchForm() {
     return (
-        <form className="d-flex" role="search">
-            <Input className="form-control me-2" type="search" placeholder="워크스페이스에서 검색" aria-label="Search" />
-        </form>
+        <Input className="form-control me-2" type="search" placeholder="워크스페이스에서 검색" aria-label="Search" />
     )
 };
 

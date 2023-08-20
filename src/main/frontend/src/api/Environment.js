@@ -7,5 +7,6 @@ export const Environment = {
         process.env.REACT_APP_BACKEND_API_HOST +
         (process.env.REACT_APP_BACKEND_API_PORT ? ":" + process.env.REACT_APP_BACKEND_API_PORT : ""),
     OAUTH_LOGIN_REDIRECT_URL: process.env.REACT_APP_OAUTH_LOGIN_REDIRECT_URL,
+
     SOCKET_PROTOCOL: process.env.REACT_APP_SOCKET_PROTOCOL
 }

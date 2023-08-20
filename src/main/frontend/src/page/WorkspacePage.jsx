@@ -116,7 +116,7 @@ function WorkspacePage() {
     useEffect(() => {
         if (!ws.current) {
 
-            const webSocketUrl = Environment.SOCKET_PROTOCOL+"://"+Environment.BACKEND_API_HOST+"/ws";
+            const webSocketUrl = Environment.SOCKET_PROTOCOL+"://"+Environment.BACKEND_API_HOST+(Environment.BACKEND_API_PORT ? ":"+Environment.BACKEND_API_PORT : "")+"/ws";
             ws.current = new WebSocket(webSocketUrl);
             ws.current.onopen = () => {
                 console.log("connected to " + webSocketUrl);
