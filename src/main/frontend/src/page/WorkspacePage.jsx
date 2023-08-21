@@ -23,6 +23,19 @@ const RefreshContext = React.createContext();
 const ChannelContext = React.createContext();
 const WebSocketSendMessageRequestContext = React.createContext();
 
+const Wrapper = styled.div`
+  display:flex;
+  flex-direction:column;
+  width:100vw;
+  height:100vh;
+`;
+
+const Section = styled.div`
+  display:flex;
+  flex:1;
+  height:90%;
+`;
+
 function WorkspacePage() {
 
     const location = useLocation()
@@ -229,36 +242,31 @@ function WorkspacePage() {
     let content;
 
     if (isWorkspaceLoading || isChannelLoading) {
-        content = <>
+        return  <>
             <SidebarFrame></SidebarFrame>
             <MainSection>
                 <div style={{color: "white"}}>Loading...</div>
             </MainSection>
         </>
-    } else {
-        content =
-        <>
-            <Sidebar channelState={channelState} workspace={workspace}></Sidebar>
-            <MainSection>
-                <ChannelSection channelState={channelState} workspace={workspace}></ChannelSection>
-            </MainSection>
-        </>;
     }
 
     return (
         <WebSocketSendMessageRequestContext.Provider value={webSocketSendMessageRequestState}>
             <ChannelContext.Provider value={channelState}>
                 <RefreshContext.Provider value={refreshState}>
-                    <div>
+                    <Wrapper>
                         <Navbar/>
-                        <div className="d-flex" style={{width: 1920}}>
-                            {content}
-                        </div>
+                        <Section>
+                            <Sidebar channelState={channelState} workspace={workspace}></Sidebar>
+                            <ChannelSection channelState={channelState} workspace={workspace}></ChannelSection>
+                        </Section>
+
+
                         <CreateChannelModal channelState={channelState} workspace={workspace}></CreateChannelModal>
                         <InviteWorkspaceModal workspace={workspace}></InviteWorkspaceModal>
                         <ErrorModal> </ErrorModal>
                         <AddMemberToChannelModal></AddMemberToChannelModal>
-                    </div>
+                    </Wrapper>
                 </RefreshContext.Provider>
             </ChannelContext.Provider>
         </WebSocketSendMessageRequestContext.Provider>

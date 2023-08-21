@@ -10,6 +10,7 @@ const Wrapper = styled.div`
     align-items:center;
     flex-direction:row;
     border-bottom: 2px solid #2B2A2F;
+    flex-shrink: 0;
 `;
 
 function SubSection(props) {

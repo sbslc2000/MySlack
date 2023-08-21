@@ -7,6 +7,7 @@ import WorkspacePage from "./page/WorkspacePage";
 import WorkspaceCreatePage from "./page/WorkspaceCreatePage";
 import WorkspaceFrame from "./component/workspace/WorkspaceFrame";
 import InvitePage from "./page/InvitePage";
+import TestPage from "./page/TestPage";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
               <Route path="/app/workspace/:id" element={<WorkspacePage/>}/>
               <Route path="/workspace/create" element={<WorkspaceCreatePage/>}/>
               <Route path="/workspace/enter/:code" element={<InvitePage/>}/>
+              <Route path="/test" element={<TestPage/>}/>
           </Routes>
       </BrowserRouter>
   );
