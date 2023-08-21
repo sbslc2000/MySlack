@@ -8,6 +8,7 @@ const Wrapper = styled.div`
     flex-direction:column;
     padding-top:52px;
     padding-bottom:16px;
+  flex-shrink: 0;
 `;
 const WelcomeMessageWrapper = styled.div`
     height:41px;

@@ -11,9 +11,9 @@ const Wrapper = styled.div`
     padding-right:20px;
     height:142px;
     position:absolute;
-    width:1660px;
     bottom:0;
-
+    left:250px;
+    right:0;
 `;
 
 const MessageFormWrapper = styled.div`

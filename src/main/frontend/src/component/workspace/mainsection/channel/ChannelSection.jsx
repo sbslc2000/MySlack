@@ -10,15 +10,22 @@ import ChannelWelcome from "./ChannelWelcome";
 
 
 const Wrapper = styled.div`
-    color:#D1D2D3;
+  color:#D1D2D3;
+  background-color:#1A1D21;
+  flex: 1;
+  display:flex;
+  flex-direction:column;
+`;
+
+const MessageFormSpacer = styled.div`
+  height: 172px;
+  flex-shrink: 0;
 `;
 
 
 
 
-
 const ChannelSectionBody = styled.div`
-    height:832px;
 `;
 function ChannelSection(props) {
     const workspace = props.workspace;
@@ -27,11 +34,10 @@ function ChannelSection(props) {
     return (
       <Wrapper>
           <ChannelSectionHeader workspace={workspace}/>
-          <ChannelSectionBody>
-              <ChannelWelcome workspace={workspace} channel={currentChannel}/>
-              <MessageSection>
-              </MessageSection>
-          </ChannelSectionBody>
+          <ChannelWelcome workspace={workspace} channel={currentChannel}/>
+          <MessageSection>
+          </MessageSection>
+          <MessageFormSpacer />
           <MessageForm></MessageForm>
       </Wrapper>
     );

@@ -11,56 +11,10 @@ import DateUtil from "../../../../util/DateUtil";
 import {getMessages} from "../../../../api/message";
 
 const Wrapper = styled.div`
-    min-height:470px;
-    max-height:470px;
-    overflow:auto;
-`;
-
-const MessageWithNameWrapper = styled.div`
-    padding-left:20px;
-    padding-right:20px;
-    display:flex;
-    &:hover{
-        background-color:#222529;
-    }
-    padding-top:16px;
-`;
-
-const MessageWithoutNameWrapper = styled.div`
-    padding-top:5px;
-    padding-left:66px;
-    padding-right:20px;
-    display:flex;
-    &:hover{
-        background-color:#222529;
-    }
-`;
-
-const MessageUserIcon = styled.img`
-    width: 36px;
-    height: 36px;
-    border-radius:5px;
-`;
-
-const MessageBodyWithName = styled.div`
-    width: 1584px;
-    display:flex;
-    flex-direction:column;
-    padding-left:10px;
-    vertical-align:middle;
-    
-     &:hover{
-        background-color:#222529;
-    }
-`;
-
-const MessageBody = styled.div`
-    font-size:16px;
-    display:inline-block;
-    > span {
-         white-space: pre-wrap;
-          word-break: break-all;
-    }
+    //min-height:470px;
+    //max-height:470px;
+  flex-shrink: 1;
+  overflow:scroll;
 `;
 
 

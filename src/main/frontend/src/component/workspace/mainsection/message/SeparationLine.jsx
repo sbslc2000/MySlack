@@ -5,6 +5,7 @@ const Wrapper = styled.div`
     height:40px;
     display:flex;
     align-items:center;
+    justify-content: center;
     
 `
 const Line = styled.div`
@@ -31,9 +32,7 @@ const SeparationLineButton = styled.button`
 function SeparationLine(props) {
     return (
         <Wrapper>
-            <Line></Line>
             <SeparationLineButton>{props.date}</SeparationLineButton>
-            <Line></Line>
         </Wrapper>
     )
 }

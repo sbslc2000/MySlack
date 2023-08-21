@@ -3,7 +3,6 @@ import MessageBody from "./MessageBody";
 import DateUtil from "../../../../util/DateUtil";
 
 const Wrapper = styled.div`
-    width: 1584px;
     display:flex;
     flex-direction:column;
     padding-left:10px;
