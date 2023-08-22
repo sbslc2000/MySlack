@@ -35,7 +35,7 @@ import java.time.LocalDateTime;
 
 @SpringBootTest
         (
-                webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+                webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
                 properties = {
                         "spring.config.location=classpath:application-test.yml"
                 }

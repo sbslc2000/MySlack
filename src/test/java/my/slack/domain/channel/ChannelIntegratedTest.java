@@ -5,10 +5,7 @@ import my.slack.BaseIntegratedTest;
 import my.slack.api.response.BaseResponse;
 import my.slack.common.login.model.LoginInfo;
 import my.slack.domain.channel.ChannelService;
-import my.slack.domain.channel.model.Channel;
-import my.slack.domain.channel.model.ChannelCreateRequestDto;
-import my.slack.domain.channel.model.ChannelDto;
-import my.slack.domain.channel.model.ChannelMemberCreateRequestDto;
+import my.slack.domain.channel.model.*;
 import my.slack.domain.message.model.MessageDto;
 import my.slack.domain.workspace.model.Workspace;
 import my.slack.socket.util.SendingMessageInfo;
@@ -74,6 +71,36 @@ public class ChannelIntegratedTest extends BaseIntegratedTest {
         assertThat(afterChannelRepositorySize).isEqualTo(beforeChannelRepositorySize + 1);
 
         assertRefreshChannelListSocketMessage();
+    }
+
+    @Test
+    @DisplayName("채널 이름 변경: 성공")
+    void updateChannel() throws Exception {
+        Long channelId = 3L;
+
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("loginInfo",getLoginInfo("user1"));
+
+        ChannelUpdateRequestDto dto = new ChannelUpdateRequestDto("newChannelName");
+
+        String requestBody = objectMapper.writeValueAsString(dto);
+
+        //when
+        MvcResult mvcResult = mockMvc.perform(patch(BASE_URL + "/" + channelId).content(requestBody)
+                        .session(session)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        BaseResponse baseResponse = getBaseResponse(mvcResult);
+        ChannelDto channelDto = extractResult(baseResponse, ChannelDto.class);
+
+        //then
+        Channel channel = channelRepository.findById(3L).get();
+        assertThat(channel.getName()).isEqualTo("newChannelName");
+        assertThat(channelDto.getName()).isEqualTo("newChannelName");
+
+
     }
 
 

@@ -1,11 +1,13 @@
 package my.slack.domain.channel;
 
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import my.slack.api.response.BaseResponse;
 import my.slack.common.login.LoginUser;
 import my.slack.domain.channel.model.ChannelCreateRequestDto;
 import my.slack.domain.channel.model.ChannelDto;
 import my.slack.domain.channel.model.ChannelMemberCreateRequestDto;
+import my.slack.domain.channel.model.ChannelUpdateRequestDto;
 import my.slack.domain.message.MessageService;
 import my.slack.domain.message.model.MessageDto;
 import my.slack.domain.user.model.User;
@@ -26,6 +28,15 @@ public class ChannelController {
     public BaseResponse<ChannelDto> addChannel(@RequestBody ChannelCreateRequestDto channelCreateRequestDto,
                                                @LoginUser User loginUser) {
         ChannelDto channelDto = channelService.createChannel(channelCreateRequestDto, loginUser);
+        return new BaseResponse<>(channelDto);
+    }
+
+    @PatchMapping ("/{channelId}")
+    public BaseResponse<ChannelDto> changeChannel(@PathVariable Long channelId,
+                                                  @RequestBody ChannelUpdateRequestDto channelUpdateRequestDto,
+                                                  @LoginUser User loginUser) {
+
+        ChannelDto channelDto = channelService.updateChannel(channelId, channelUpdateRequestDto, loginUser);
         return new BaseResponse<>(channelDto);
     }
 

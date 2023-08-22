@@ -84,4 +84,8 @@ public class Channel extends BaseTimeEntity {
     public boolean isPublic() {
         return !isPrivate;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

@@ -93,6 +93,20 @@ public class ChannelService {
         webSocketNotifyService.notifyChannelChanged(channel.getWorkspace());
     }
 
+    public ChannelDto updateChannel(Long channelId,ChannelUpdateRequestDto channelUpdateRequestDto, User loginUser) {
+        Channel channel = findChannel(channelId);
+        if(!channel.getCreator().equals(loginUser)) {
+            throw new ClientFaultException(PERMISSION_DENIED, "채널의 생성자만 채널을 수정할 수 있습니다.");
+        }
+
+        if(channelUpdateRequestDto.getName() != null) {
+            channel.setName(channelUpdateRequestDto.getName());
+        }
+
+        webSocketNotifyService.notifyChannelChanged(channel.getWorkspace());
+        return ChannelDto.of(channel);
+    }
+
     public List<User> addMembers(Long channelId, ChannelMemberCreateRequestDto channelMemberCreateRequestDto, User loginUser) {
 
         String userId = channelMemberCreateRequestDto.getUserId();
