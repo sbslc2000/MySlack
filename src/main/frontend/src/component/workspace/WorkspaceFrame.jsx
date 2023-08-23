@@ -4,23 +4,25 @@ import Sidebar from "./sidebar/Sidebar";
 import MainSection from "./mainsection/MainSection";
 import ChannelSection from "./mainsection/channel/ChannelSection";
 import styled from "styled-components";
+import ChannelSectionFrame from "./mainsection/channel/ChannelSectionFrame";
 
 const Wrapper = styled.div`
-    color:#D1D2D3;
+  color:#D1D2D3;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 `;
 
 
 function WorkspaceFrame(props) {
     return (
         <Wrapper>
-            <NavbarFrame></NavbarFrame>
-
-            <div style={{display:"flex"}}>
+            <NavbarFrame/>
+            <div style={{display:"flex",flexGrow: 1}}>
                 <SidebarFrame></SidebarFrame>
-                <MainSection>
+                <ChannelSectionFrame>
                     {props.children}
-                </MainSection>
-                <MainSection/>
+                </ChannelSectionFrame>
             </div>
         </Wrapper>
     )

@@ -6,6 +6,7 @@ import MessageForm from "../../form/MessageForm";
 import MessageSection from "../message/MessageSection";
 import ChannelSectionHeader from "./ChannelSectionHeader";
 import ChannelWelcome from "./ChannelWelcome";
+import ChannelSectionFrame from "./ChannelSectionFrame";
 
 
 
@@ -32,14 +33,14 @@ function ChannelSection(props) {
     const currentChannel = props.channelState.currentChannel;
 
     return (
-      <Wrapper>
+      <ChannelSectionFrame>
           <ChannelSectionHeader workspace={workspace}/>
           <ChannelWelcome workspace={workspace} channel={currentChannel}/>
           <MessageSection>
           </MessageSection>
           <MessageFormSpacer />
           <MessageForm></MessageForm>
-      </Wrapper>
+      </ChannelSectionFrame>
     );
 }
 
