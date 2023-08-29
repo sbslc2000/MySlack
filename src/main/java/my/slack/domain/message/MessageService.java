@@ -6,6 +6,7 @@ import my.slack.api.ErrorCode;
 import my.slack.api.exception.ClientFaultException;
 import my.slack.common.socket.WebSocketNotifyService;
 import my.slack.domain.channel.ChannelRepository;
+import my.slack.domain.channel.ChannelService;
 import my.slack.domain.channel.exception.ChannelNotFound;
 import my.slack.domain.channel.model.Channel;
 import my.slack.domain.message.model.Message;

@@ -56,6 +56,7 @@ public class WorkspaceController {
         return new BaseResponse<>(workspaceDto);
     }
 
+
     @DeleteMapping("/{workspaceId}")
     public BaseResponse<String> deleteWorkspace(@LoginUser User loginUser, @PathVariable String workspaceId) {
         workspaceService.deleteWorkspace(workspaceId, loginUser.getId());

@@ -5,6 +5,7 @@ import my.slack.api.exception.ClientFaultException;
 import my.slack.common.socket.WebSocketNotifyService;
 import my.slack.domain.channel.exception.ChannelNotFound;
 import my.slack.domain.channel.model.*;
+import my.slack.domain.message.MessageService;
 import my.slack.domain.user.UserRepository;
 import my.slack.domain.user.UserService;
 import my.slack.domain.user.exception.UserNotFound;
@@ -34,6 +35,12 @@ public class ChannelService {
     private final ChannelMemberRepository channelMemberRepository;
     private final WebSocketNotifyService webSocketNotifyService;
 
+    /**
+     * 채널 생성
+     * @param channelCreateRequestDto
+     * @param loginUser
+     * @return 생성된 채널의 DTO
+     */
     public ChannelDto createChannel(ChannelCreateRequestDto channelCreateRequestDto,User loginUser) {
         User creator = loginUser;
         Workspace workspace = findWorkspace(channelCreateRequestDto.getWorkspaceId());

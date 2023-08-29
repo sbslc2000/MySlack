@@ -67,6 +67,11 @@ function InvitePage() {
             } else {     //모두 통과시
                 const workspace = results[1].value;
 
+                /**
+                 * todo:
+                 * 여기에 워크스페이스 참가 요청 보내야함
+                 */
+
                 setContent(
                     <>
                         <Title>{workspace.name}에 참가합니다.</Title>

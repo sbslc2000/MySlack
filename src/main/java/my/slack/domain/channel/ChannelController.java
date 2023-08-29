@@ -67,6 +67,4 @@ public class ChannelController {
         List<User> members = channelService.addMembers(channelId, channelMemberCreateRequestDto, loginUser);
         return new BaseResponse<>(members);
     }
-
-
 }
